@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sistema de Pedidos TEDLE 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b900:#001e50;--b800:#003d8f;--b700:#0052b8;--b600:#1a6fd4;--b400:#5aaeff;--b100:#dbeafe;--b50:#eff6ff;
+  --g500:#00c853;--g600:#00b84c;--teal:#00897b;
+  --s900:#0f172a;--s700:#334155;--s500:#64748b;--s400:#94a3b8;--s300:#cbd5e1;--s200:#e2e8f0;--s100:#f1f5f9;
+  --w:#fff;--r:#dc2626;--r50:#fef2f2;--r100:#fee2e2;
+  --shadow:0 2px 12px rgba(15,23,42,.07);--shadow-lg:0 8px 30px rgba(15,23,42,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--s100);color:var(--s900);font-size:15px}
+a{color:var(--b700)}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#001e50,#002d6b 50%,#003d8f);color:#fff;padding:1.8rem 1.5rem 2.6rem;text-align:center;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 15% 60%,rgba(0,200,83,.1),transparent 55%),radial-gradient(ellipse at 85% 20%,rgba(26,111,212,.15),transparent 50%);pointer-events:none}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:var(--s100);clip-path:ellipse(55% 100% at 50% 100%)}
+.hbadge{display:inline-flex;align-items:center;gap:5px;background:rgba(0,200,83,.15);border:1px solid rgba(0,200,83,.3);color:#4ade80;font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:3px 11px;border-radius:100px;margin-bottom:.7rem}
+.hbadge::before{content:'●';font-size:.4rem;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+header h1{font-size:clamp(1.3rem,3vw,2rem);font-weight:700;line-height:1.2;position:relative}
+header h1 span{color:#4ade80}
+header p{font-size:.83rem;color:rgba(255,255,255,.65);position:relative;margin-top:.3rem}
+
+/* LAYOUT */
+main{max-width:1140px;margin:0 auto;padding:1.5rem 1rem 3rem;display:grid;gap:1.1rem}
+
+/* CARD */
+.card{background:var(--w);border-radius:14px;border:1px solid var(--s200);box-shadow:var(--shadow);overflow:hidden}
+.card-hd{padding:.9rem 1.1rem;border-bottom:1px solid var(--s200);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.card-ico.blue{background:var(--b100)}
+.card-ico.green{background:#dcfce7}
+.card-hd h2{font-size:.9rem;font-weight:600;flex:1}
+.card-body{padding:1.1rem}
+
+/* FORM */
+.form-grid{display:grid;gap:.75rem}
+@media(min-width:600px){.grid-2{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.grid-4{grid-template-columns:1fr 1fr 1fr 1fr}}
+.fg{display:grid;gap:.3rem}
+label{font-size:.78rem;font-weight:500;color:var(--s700)}
+input.inp,select.inp,textarea.inp{width:100%;padding:.6rem .85rem;border:1.5px solid var(--s200);border-radius:8px;font-family:inherit;font-size:.88rem;background:var(--s100);color:var(--s900);transition:border-color .18s,box-shadow .18s;resize:vertical}
+input.inp:focus,select.inp:focus,textarea.inp:focus{outline:none;border-color:var(--b600);background:var(--w);box-shadow:0 0 0 3px rgba(0,82,184,.1)}
+
+/* PRODUCT SECTION */
+.prod-controls{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.85rem}
+.prod-controls input{flex:1;min-width:160px}
+.prod-controls select{min-width:180px;max-width:260px}
+.pill-row{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.85rem}
+.pill{padding:3px 11px;border-radius:100px;border:1.5px solid var(--s300);font-size:.72rem;font-weight:500;cursor:pointer;background:var(--w);color:var(--s700);transition:all .15s;white-space:nowrap}
+.pill:hover{border-color:var(--b600);color:var(--b700)}
+.pill.active{background:var(--b700);border-color:var(--b700);color:#fff}
+
+/* PRODUCT TABLE */
+.prod-table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--s200)}
+table.prod-table{width:100%;border-collapse:collapse;font-size:.82rem}
+table.prod-table thead th{background:var(--b800);color:#fff;padding:.55rem .8rem;text-align:left;font-weight:600;font-size:.73rem;letter-spacing:.03em;white-space:nowrap}
+table.prod-table thead th:last-child{text-align:center;width:90px}
+table.prod-table tbody tr{border-bottom:1px solid var(--s200);transition:background .12s}
+table.prod-table tbody tr:last-child{border-bottom:none}
+table.prod-table tbody tr:hover{background:var(--b50)}
+table.prod-table tbody td{padding:.5rem .8rem;vertical-align:middle}
+.td-model{font-family:'DM Mono',monospace;font-size:.75rem;font-weight:500;color:var(--b800);white-space:nowrap}
+.td-desc{color:var(--s700);max-width:320px;line-height:1.35}
+.td-price{font-family:'DM Mono',monospace;font-weight:500;white-space:nowrap}
+.td-avail{font-size:.72rem}
+.av-ok{color:var(--teal);font-weight:600}
+.av-no{color:var(--s400)}
+.td-add{text-align:center}
+.btn-add{background:var(--b700);color:#fff;border:none;border-radius:7px;padding:.35rem .7rem;font-size:.75rem;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap}
+.btn-add:hover{background:var(--b800)}
+.btn-add:active{transform:scale(.97)}
+.btn-add.added{background:var(--teal)}
+.no-price{color:var(--s400);font-size:.75rem;font-style:italic}
+.tag-panel{background:#fef3c7;color:#92400e;font-size:.68rem;font-weight:600;padding:1px 6px;border-radius:4px;margin-left:4px}
+
+/* QTY INPUT */
+.qty-wrap{display:flex;align-items:center;gap:4px;justify-content:center}
+.qty-btn{width:24px;height:24px;border-radius:5px;border:1px solid var(--s300);background:var(--s100);cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s}
+.qty-btn:hover{background:var(--s200)}
+input.qty-inp{width:44px;text-align:center;padding:.2rem;border:1.5px solid var(--s200);border-radius:6px;font-family:'DM Mono',monospace;font-size:.8rem;background:var(--s100)}
+input.qty-inp:focus{outline:none;border-color:var(--b600)}
+
+/* CART */
+.cart-empty{text-align:center;padding:2rem;color:var(--s400);font-size:.88rem}
+table.cart-table{width:100%;border-collapse:collapse;font-size:.82rem;table-layout:fixed}
+table.cart-table th{background:var(--s100);padding:.5rem .6rem;text-align:left;font-size:.72rem;font-weight:600;color:var(--s500);border-bottom:1px solid var(--s200);text-transform:uppercase;letter-spacing:.05em}
+table.cart-table td{padding:.5rem .6rem;border-bottom:1px solid var(--s200);vertical-align:middle;overflow:hidden}
+table.cart-table tr:last-child td{border-bottom:none}
+table.cart-table th:nth-child(1),table.cart-table td:nth-child(1){width:auto}
+table.cart-table th:nth-child(2),table.cart-table td:nth-child(2){width:88px}
+table.cart-table th:nth-child(3),table.cart-table td:nth-child(3){width:76px;text-align:right}
+table.cart-table th:nth-child(4),table.cart-table td:nth-child(4){width:26px}
+.cart-model{font-family:'DM Mono',monospace;font-size:.73rem;color:var(--b800);font-weight:500}
+.cart-desc{font-size:.78rem;color:var(--s700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-price{font-family:'DM Mono',monospace;font-size:.78rem}
+.btn-remove{background:none;border:none;color:var(--s400);cursor:pointer;font-size:1rem;padding:0 4px;transition:color .12s}
+.btn-remove:hover{color:var(--r)}
+
+/* SUMMARY */
+.summary-box{background:var(--b50);border:1px solid var(--b100);border-radius:10px;padding:1rem 1.1rem;margin-top:.85rem}
+.sum-row{display:flex;justify-content:space-between;font-size:.83rem;padding:.25rem 0;color:var(--s700)}
+.sum-row.saving{color:var(--teal);font-weight:500}
+.sum-row.total{border-top:1.5px solid var(--b200,#93c5fd);margin-top:.4rem;padding-top:.5rem;font-size:1rem;font-weight:700;color:var(--b800)}
+.sum-row .val{font-family:'DM Mono',monospace;font-weight:500}
+.disc-bar-wrap{margin:.6rem 0}
+.disc-bar-bg{background:var(--s200);border-radius:100px;height:7px;overflow:hidden}
+.disc-bar-fill{height:100%;background:linear-gradient(90deg,#00c853,#00897b,#1a6fd4);border-radius:100px;transition:width .5s cubic-bezier(.16,1,.3,1);width:0}
+.disc-label{font-size:.72rem;color:var(--s500);margin-top:.25rem;text-align:right}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:.7rem 1.2rem;border-radius:9px;border:none;font-family:inherit;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .18s,transform .1s,box-shadow .18s;width:100%;margin-top:.6rem}
+.btn:active{transform:scale(.98)}
+.btn-wa{background:linear-gradient(135deg,#128C7E,#25D366);color:#fff;box-shadow:0 4px 14px rgba(37,211,102,.3)}
+.btn-wa:hover{background:linear-gradient(135deg,#075e54,#128C7E);box-shadow:0 6px 18px rgba(37,211,102,.4)}
+.btn-reset{background:var(--s100);color:var(--s700);border:1.5px solid var(--s300)}
+.btn-reset:hover{background:var(--s200)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+
+/* ADMIN PANEL */
+#admin-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;overflow-y:auto;padding:1.5rem}
+.admin-modal{background:var(--w);border-radius:16px;max-width:900px;margin:0 auto;box-shadow:var(--shadow-lg);overflow:hidden}
+.admin-hd{background:var(--b900);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between}
+.admin-hd h3{font-size:.95rem;font-weight:600}
+.btn-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.3rem;cursor:pointer;padding:0 4px;line-height:1}
+.btn-close:hover{color:#fff}
+.admin-body{padding:1.25rem}
+.admin-toolbar{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.btn-sm{padding:.4rem .8rem;border-radius:7px;border:none;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-add-prod{background:var(--b700);color:#fff}
+.btn-add-prod:hover{background:var(--b800)}
+.btn-save-all{background:var(--teal);color:#fff}
+.btn-save-all:hover{background:#00695c}
+.btn-export{background:var(--s200);color:var(--s700)}
+.btn-export:hover{background:var(--s300)}
+table.admin-table{width:100%;border-collapse:collapse;font-size:.8rem}
+table.admin-table th{background:var(--s100);padding:.5rem .6rem;text-align:left;font-size:.72rem;font-weight:600;color:var(--s500);border-bottom:1px solid var(--s200);white-space:nowrap}
+table.admin-table td{padding:.4rem .5rem;border-bottom:1px solid var(--s200);vertical-align:middle}
+table.admin-table tr:hover{background:var(--b50)}
+.admin-inp{width:100%;border:1.5px solid var(--s200);border-radius:6px;padding:.3rem .5rem;font-size:.78rem;font-family:inherit;background:var(--s100)}
+.admin-inp:focus{outline:none;border-color:var(--b600);background:var(--w)}
+.btn-del{background:none;border:none;color:var(--r);cursor:pointer;font-size:.85rem;padding:0}
+.btn-del:hover{color:#991b1b}
+
+/* PAYMENT METHOD */
+/* pay mix */
+.pay-usd-opt{border:2px solid var(--s200);border-radius:10px;padding:.75rem 1rem;cursor:pointer;transition:all .15s;background:var(--w);display:flex;align-items:flex-start;gap:.6rem;margin-bottom:.6rem}
+.pay-usd-opt:hover{border-color:var(--b400);background:var(--b50)}
+.pay-usd-opt.selected{border-color:var(--b700);background:var(--b50);box-shadow:0 0 0 3px rgba(0,82,184,.1)}
+.pay-usd-opt input[type=checkbox]{margin-top:3px;accent-color:var(--b700);flex-shrink:0;width:15px;height:15px}
+.pay-mix-hint{font-size:.72rem;color:var(--s500);margin-bottom:.4rem}
+.pay-mix-row{border:2px solid var(--s200);border-radius:10px;padding:.65rem .85rem;transition:border-color .15s,background .15s;background:var(--w);margin-bottom:.45rem}
+.pay-mix-row.active{border-color:var(--b500);background:var(--b50)}
+.pay-mix-row.disabled{opacity:.45;pointer-events:none}
+.pay-mix-header{display:flex;align-items:flex-start;gap:.6rem;cursor:pointer}
+.pay-mix-header input[type=checkbox]{margin-top:3px;accent-color:var(--b700);flex-shrink:0;width:15px;height:15px}
+.pay-opt-body{flex:1}
+.pay-opt-name{font-size:.85rem;font-weight:600;color:var(--s900)}
+.pay-opt-detail{font-size:.73rem;color:var(--s500);margin-top:2px;line-height:1.35}
+.pay-opt-badge{display:inline-block;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:4px;margin-top:4px}
+.badge-free{background:#dcfce7;color:#166534}
+.badge-cost{background:#fef3c7;color:#92400e}
+.badge-usd{background:var(--b100);color:var(--b800)}
+.pay-mix-inputs{margin-top:.55rem;padding-top:.5rem;border-top:1px solid var(--b100);display:flex;flex-wrap:wrap;gap:.4rem .7rem;align-items:center}
+.pay-mix-inp-group{display:flex;align-items:center;gap:.3rem}
+.pay-mix-inp-group label{font-size:.72rem;color:var(--s500);white-space:nowrap}
+.pay-mix-inp{width:80px;padding:.3rem .45rem;border:1.5px solid var(--s200);border-radius:7px;font-family:'DM Mono',monospace;font-size:.82rem;text-align:right;background:var(--s100)}
+.pay-mix-inp:focus{outline:none;border-color:var(--b600);background:var(--w)}
+.pay-mix-inp.wide{width:100px}
+.pay-days-inp{width:62px;padding:.3rem .45rem;border:1.5px solid var(--s200);border-radius:7px;font-family:'DM Mono',monospace;font-size:.82rem;text-align:center;background:var(--s100)}
+.pay-days-inp:focus{outline:none;border-color:var(--b600);background:var(--w)}
+.pay-alloc{margin-top:.75rem;padding:.55rem .75rem;background:var(--s50,#f8fafc);border:1px solid var(--s200);border-radius:8px}
+.pay-alloc-bar-bg{height:7px;background:var(--s200);border-radius:4px;overflow:hidden;margin-bottom:.35rem}
+.pay-alloc-bar-fill{height:100%;border-radius:4px;transition:width .2s,background .2s}
+.pay-alloc-label{font-size:.73rem;color:var(--s600);display:flex;justify-content:space-between}
+.pay-alloc-label.ok{color:#166534;font-weight:600}
+.pay-alloc-label.over{color:#991b1b;font-weight:600}
+.pay-info-box{background:var(--b50);border:1px solid var(--b100);border-radius:8px;padding:.6rem .85rem;margin-top:.75rem;font-size:.75rem;color:var(--s700);line-height:1.5;display:none}
+.pay-info-box.show{display:block}
+.sum-row.deduction{color:#92400e}
+.sum-row.usd-bonus{color:var(--teal)}
+
+/* ADMIN TRIGGER */
+.admin-trigger{text-align:center;margin-top:1.5rem;padding:.5rem}
+.admin-link{font-size:.72rem;color:var(--s400);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;text-underline-offset:2px}
+.admin-link:hover{color:var(--s600,var(--s700))}
+
+/* LOGIN MODAL */
+#login-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:center;justify-content:center}
+#login-modal.show{display:flex}
+.login-box{background:var(--w);border-radius:14px;padding:2rem;width:min(320px,90vw);box-shadow:var(--shadow-lg);text-align:center}
+.login-box h3{font-size:1rem;font-weight:700;margin-bottom:.3rem}
+.login-box p{font-size:.8rem;color:var(--s500);margin-bottom:1.1rem}
+.login-error{color:var(--r);font-size:.78rem;margin-top:.4rem;display:none}
+
+/* SECTION HEADERS */
+.section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--s500);padding:.35rem .8rem;background:var(--s100);border-bottom:1px solid var(--s200)}
+
+/* PAGINATION */
+.pagination{display:flex;justify-content:center;align-items:center;gap:.35rem;margin-top:.85rem;flex-wrap:wrap}
+.page-btn{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--s300);background:var(--w);cursor:pointer;font-size:.8rem;font-weight:500;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.page-btn:hover{border-color:var(--b600);color:var(--b700)}
+.page-btn.active{background:var(--b700);border-color:var(--b700);color:#fff}
+.page-info{font-size:.75rem;color:var(--s500)}
+
+/* RESPONSIVE */
+@media(min-width:880px){
+  .main-grid{display:grid;grid-template-columns:1fr 360px;gap:1.1rem;align-items:start}
+  .sticky-cart{position:sticky;top:1rem}
+}
+@media(max-width:520px){
+  .card-body{padding:.85rem}
+  table.prod-table .td-desc{max-width:160px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hbadge">Sistema de Pedidos</div>
+  <h1>Pedidos por Volumen <span>TEDLE</span></h1>
+  <p>Lista de precios actualizada · Pago por transferencia bancaria · Descuento progresivo automático</p>
+</header>
+
+<main>
+
+  <!-- DATOS DEL CLIENTE -->
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ico blue">👤</div>
+      <h2>Datos del cliente</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid grid-2" id="cliente-form">
+        <div class="fg"><label>Nombre y Apellido *</label><input class="inp" id="cl-nombre" type="text" placeholder="Juan Pérez"/></div>
+        <div class="fg"><label>Empresa</label><input class="inp" id="cl-empresa" type="text" placeholder="Solar Sur SRL"/></div>
+        <div class="fg"><label>Teléfono</label><input class="inp" id="cl-tel" type="tel" placeholder="+54 11 XXXX-XXXX"/></div>
+        <div class="fg"><label>Dirección de entrega</label><input class="inp" id="cl-dir" type="text" placeholder="Calle Falsa 123, CABA"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATÁLOGO DE PRODUCTOS -->
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-ico blue">📦</div>
+      <h2>Catálogo de productos</h2>
+      <span id="prod-count" style="font-size:.72rem;color:var(--s500);margin-left:auto"></span>
+    </div>
+    <div class="card-body">
+      <div class="prod-controls">
+        <input class="inp" id="search" type="search" placeholder="🔍  Buscar modelo o descripción…" oninput="filterProducts()"/>
+        <select class="inp" id="cat-filter" onchange="filterProducts()">
+          <option value="">Todas las categorías</option>
+        </select>
+      </div>
+      <div id="prod-placeholder" style="text-align:center;padding:2.5rem 1rem;color:var(--s400);font-size:.88rem">
+        Usá el buscador o seleccioná una categoría para ver productos.
+      </div>
+      <div id="prod-table-wrap" class="prod-table-wrap" style="display:none">
+        <table class="prod-table">
+          <thead><tr>
+            <th>Modelo</th>
+            <th>Descripción</th>
+            <th>Con IVA</th>
+            <th>Disp.</th>
+            <th>Agregar</th>
+          </tr></thead>
+          <tbody id="prod-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID: FORMA DE PAGO + CARRITO -->
+  <div class="main-grid">
+
+    <!-- FORMA DE PAGO -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-ico blue">💳</div>
+        <h2>Forma de pago</h2>
+        <span style="font-size:.72rem;color:var(--s500);margin-left:auto">Afecta el descuento final</span>
+      </div>
+      <div class="card-body">
+        <!-- USD exclusivo -->
+        <label class="pay-usd-opt" id="pay-usd-opt">
+          <input type="checkbox" id="pay-usd-cb" onchange="toggleUsdMode(this.checked)"/>
+          <div class="pay-opt-body">
+            <div class="pay-opt-name">💵 Transferencia / depósito USD</div>
+            <div class="pay-opt-detail">Pago 100% en dólares · no combinable con otros métodos</div>
+            <span class="pay-opt-badge badge-usd">+1.00% descuento adicional</span>
+          </div>
+        </label>
+
+        <!-- Métodos combinables -->
+        <div id="pay-mix-section">
+          <div class="pay-mix-hint">Seleccioná uno o más métodos. Los porcentajes deben sumar 100%.</div>
+
+          <!-- Transferencia ARS -->
+          <div class="pay-mix-row active" id="pmr-trans-ars">
+            <div class="pay-mix-header">
+              <input type="checkbox" id="pmcb-trans-ars" checked onchange="togglePayMethod('trans-ars', this.checked)"/>
+              <div class="pay-opt-body">
+                <div class="pay-opt-name">🏦 Transferencia bancaria</div>
+                <div class="pay-opt-detail">Pago en pesos (ARS)</div>
+                <span class="pay-opt-badge badge-free">Sin deducción</span>
+              </div>
+            </div>
+            <div class="pay-mix-inputs" id="pmi-trans-ars">
+              <div class="pay-mix-inp-group">
+                <label>%</label>
+                <input class="pay-mix-inp" type="number" id="pm-pct-trans-ars" min="0" max="100" step="1" value="100" oninput="updatePayPct('trans-ars',this.value)"/>
+              </div>
+              <div class="pay-mix-inp-group">
+                <label>USD</label>
+                <input class="pay-mix-inp wide" type="number" id="pm-amt-trans-ars" min="0" step="0.01" placeholder="—" oninput="updatePayAmt('trans-ars',this.value)"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- e-check propio -->
+          <div class="pay-mix-row" id="pmr-echeck-propio">
+            <div class="pay-mix-header">
+              <input type="checkbox" id="pmcb-echeck-propio" onchange="togglePayMethod('echeck-propio', this.checked)"/>
+              <div class="pay-opt-body">
+                <div class="pay-opt-name">📄 e-check propio</div>
+                <div class="pay-opt-detail">Echeq de cuenta propia · hasta 60 días</div>
+                <span class="pay-opt-badge badge-cost">Ded. 0.70% base + 0.08%/día</span>
+              </div>
+            </div>
+            <div class="pay-mix-inputs" id="pmi-echeck-propio" style="display:none">
+              <div class="pay-mix-inp-group">
+                <label>%</label>
+                <input class="pay-mix-inp" type="number" id="pm-pct-echeck-propio" min="0" max="100" step="1" value="0" oninput="updatePayPct('echeck-propio',this.value)"/>
+              </div>
+              <div class="pay-mix-inp-group">
+                <label>USD</label>
+                <input class="pay-mix-inp wide" type="number" id="pm-amt-echeck-propio" min="0" step="0.01" placeholder="—" oninput="updatePayAmt('echeck-propio',this.value)"/>
+              </div>
+              <div class="pay-mix-inp-group">
+                <label>Días</label>
+                <input class="pay-days-inp" type="number" id="pm-days-echeck-propio" min="1" max="60" value="30" oninput="updatePayDays('echeck-propio',this.value)"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cheque físico -->
+          <div class="pay-mix-row" id="pmr-cheque-fisico">
+            <div class="pay-mix-header">
+              <input type="checkbox" id="pmcb-cheque-fisico" onchange="togglePayMethod('cheque-fisico', this.checked)"/>
+              <div class="pay-opt-body">
+                <div class="pay-opt-name">📋 Cheque propio físico</div>
+                <div class="pay-opt-detail">Cheque físico de cuenta propia</div>
+                <span class="pay-opt-badge badge-cost">Ded. 1.40% base + 0.08%/día</span>
+              </div>
+            </div>
+            <div class="pay-mix-inputs" id="pmi-cheque-fisico" style="display:none">
+              <div class="pay-mix-inp-group">
+                <label>%</label>
+                <input class="pay-mix-inp" type="number" id="pm-pct-cheque-fisico" min="0" max="100" step="1" value="0" oninput="updatePayPct('cheque-fisico',this.value)"/>
+              </div>
+              <div class="pay-mix-inp-group">
+                <label>USD</label>
+                <input class="pay-mix-inp wide" type="number" id="pm-amt-cheque-fisico" min="0" step="0.01" placeholder="—" oninput="updatePayAmt('cheque-fisico',this.value)"/>
+              </div>
+              <div class="pay-mix-inp-group">
+                <label>Días</label>
+                <input class="pay-days-inp" type="number" id="pm-days-cheque-fisico" min="1" max="60" value="30" oninput="updatePayDays('cheque-fisico',this.value)"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- e-check de terceros -->
+          <div class="pay-mix-row" id="pmr-echeck-terceros">
+            <div class="pay-mix-header">
+              <input type="checkbox" id="pmcb-echeck-terceros" onchange="togglePayMethod('echeck-terceros', this.checked)"/>
+              <div class="pay-opt-body">
+                <div class="pay-opt-name">📄 e-check de terceros</div>
+                <div class="pay-opt-detail">Echeq endosado de terceros · hasta 60 días</div>
+                <span class="pay-opt-badge badge-cost">Ded. 1.90% base + 0.08%/día</span>
+              </div>
+            </div>
+            <div class="pay-mix-inputs" id="pmi-echeck-terceros" style="display:none">
+              <div class="pay-mix-inp-group">
+                <label>%</label>
+                <input class="pay-mix-inp" type="number" id="pm-pct-echeck-terceros" min="0" max="100" step="1" value="0" oninput="updatePayPct('echeck-terceros',this.value)"/>
+              </div>
+              <div class="pay-mix-inp-group">
+                <label>USD</label>
+                <input class="pay-mix-inp wide" type="number" id="pm-amt-echeck-terceros" min="0" step="0.01" placeholder="—" oninput="updatePayAmt('echeck-terceros',this.value)"/>
+              </div>
+              <div class="pay-mix-inp-group">
+                <label>Días</label>
+                <input class="pay-days-inp" type="number" id="pm-days-echeck-terceros" min="1" max="60" value="30" oninput="updatePayDays('echeck-terceros',this.value)"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de asignación -->
+          <div class="pay-alloc" id="pay-alloc">
+            <div class="pay-alloc-bar-bg"><div class="pay-alloc-bar-fill" id="pay-alloc-fill" style="width:100%;background:#22c55e"></div></div>
+            <div class="pay-alloc-label ok" id="pay-alloc-label"><span>Asignado</span><span>100%  ✓</span></div>
+          </div>
+        </div>
+
+        <div class="pay-info-box" id="pay-info-box"></div>
+      </div>
+    </div>
+
+    <!-- CARRITO -->
+    <div class="sticky-cart">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-ico green">🛒</div>
+          <h2>Pedido</h2>
+          <button class="btn-sm btn-export" style="margin-left:auto;font-size:.7rem;padding:.3rem .6rem" onclick="clearCart()">Limpiar</button>
+        </div>
+        <div class="card-body" style="padding:.75rem">
+          <div id="cart-content"><div class="cart-empty">Agregá productos desde el catálogo</div></div>
+
+          <div class="summary-box" id="summary-box" style="display:none">
+            <div class="sum-row"><span>Subtotal (sin IVA)</span><span class="val" id="s-subtotal">—</span></div>
+            <div class="sum-row"><span>IVA</span><span class="val" id="s-iva">—</span></div>
+            <div class="sum-row"><span>Total con IVA</span><span class="val" id="s-total-iva">—</span></div>
+            <div class="disc-bar-wrap">
+              <div class="disc-bar-bg"><div class="disc-bar-fill" id="disc-bar"></div></div>
+              <div class="disc-label" id="disc-label"></div>
+            </div>
+            <div class="sum-row saving"><span>💸 Descuento volumen</span><span class="val" id="s-desc">—</span></div>
+            <div class="sum-row deduction" id="s-pay-row" style="display:none"><span id="s-pay-label">Deducción pago</span><span class="val" id="s-pay-val">—</span></div>
+            <div class="sum-row usd-bonus" id="s-usd-row" style="display:none"><span>💵 Bonus pago en USD</span><span class="val" id="s-usd-val">—</span></div>
+            <div class="sum-row total"><span>TOTAL A PAGAR</span><span class="val" id="s-final">—</span></div>
+          </div>
+
+          <button class="btn btn-wa" id="btn-wa" onclick="enviarWA()" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Enviar pedido por WhatsApp
+          </button>
+          <button class="btn btn-reset" onclick="clearCart()" style="margin-top:.4rem;font-size:.78rem;padding:.5rem">🗑 Limpiar pedido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTA LEGAL -->
+  <div style="background:var(--w);border:1px solid var(--s200);border-radius:12px;padding:1rem 1.25rem;display:flex;gap:9px">
+    <span style="font-size:.95rem;flex-shrink:0">ℹ️</span>
+    <p style="font-size:.75rem;color:var(--s500);line-height:1.6">
+      <strong style="color:var(--s700)">Notas:</strong> Los descuentos por volumen aplican exclusivamente para <strong style="color:var(--s700)">pagos por transferencia bancaria</strong>. Los precios están en USD. Paneles solares: venta por pallet cerrado, fuera del esquema de descuento. Los precios de referencia son sin IVA; el IVA se muestra en la columna correspondiente. Precios actualizados al <strong style="color:var(--s700)">20 de abril de 2026</strong>.
+    </p>
+  </div>
+
+  <div class="admin-trigger">
+    <button class="admin-link" onclick="openLogin()">⚙️ Administración de precios</button>
+  </div>
+
+</main>
+
+<!-- LOGIN MODAL -->
+<div id="login-modal">
+  <div class="login-box">
+    <h3>🔐 Acceso Admin</h3>
+    <p>Ingresá la contraseña para editar la lista de precios</p>
+    <div class="fg"><input class="inp" id="login-pw" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')checkLogin()"/></div>
+    <div class="login-error" id="login-error">Contraseña incorrecta</div>
+    <button class="btn" style="margin-top:.8rem;background:var(--b700);color:#fff;width:100%" onclick="checkLogin()">Ingresar</button>
+    <button class="btn btn-reset" style="margin-top:.35rem" onclick="closeLogin()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel">
+  <div class="admin-modal">
+    <div class="admin-hd">
+      <h3>⚙️ Administración de lista de precios</h3>
+      <button class="btn-close" onclick="closeAdmin()">✕</button>
+    </div>
+    <div class="admin-body">
+      <div class="admin-toolbar">
+        <button class="btn-sm btn-add-prod" onclick="addNewProduct()">+ Agregar producto</button>
+        <button class="btn-sm btn-save-all" onclick="saveProducts()">💾 Guardar cambios</button>
+        <button class="btn-sm btn-export" onclick="exportJSON()">↓ Exportar JSON</button>
+        <button class="btn-sm btn-export" onclick="resetProducts()">↺ Restaurar originales</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)"/>
+        <button class="btn-sm btn-export" onclick="document.getElementById('import-file').click()">↑ Importar JSON</button>
+      </div>
+      <p style="font-size:.75rem;color:var(--s500);margin-bottom:.75rem">Los cambios se guardan en el navegador (localStorage). Exportá el JSON para respaldo.</p>
+      <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--s200)">
+        <table class="admin-table">
+          <thead><tr>
+            <th style="width:130px">Modelo</th>
+            <th>Descripción</th>
+            <th style="width:100px">Categoría</th>
+            <th style="width:80px">Precio USD</th>
+            <th style="width:60px">IVA</th>
+            <th style="width:90px">Disponib.</th>
+            <th style="width:36px"></th>
+          </tr></thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WA_NUMBER = '5491140289444';
+const ADMIN_PASS = 'tedle2026';
+const STORAGE_KEY = 'tedle_products_v2';
+const PAGE_SIZE = 25;
+
+// ── PRODUCT DATA ──
+const DEFAULT_PRODUCTS = [{"id": 1, "model": "AS-7M120-HC-460W", "desc": "Panel Solar Fotovoltaico Monocristalino PERC 120 celdas 460Wp - Voc 41.8 V - Isc 13.9A / (31 unidades por pallet)", "price": null, "iva": 0.21, "avail": "", "cat": "AMERISOLAR"}, {"id": 2, "model": "AS-7M144-HC-550W", "desc": "Panel Solar Fotovoltaico Monocristalino PERC 144 celdas 550Wp - Voc 50.0 V - Isc 13.94A / (36 unidades por pallet)", "price": null, "iva": 0.21, "avail": "", "cat": "AMERISOLAR"}, {"id": 3, "model": "AS-7M120N-BHC-480W", "desc": "Panel Solar Fotovoltaico Bifacial Monocristalino tipo N 120 celdas 480Wp - Voc 42.71 V - Isc 14.31A / Venta por pallet cerrado - 36 unidades por pallet", "price": 111.0, "iva": 0.105, "avail": "Disponible", "cat": "AMERISOLAR"}, {"id": 4, "model": "AS-7M120N-BHC-485W", "desc": "Panel Solar Fotovoltaico Bifacial Monocristalino tipo N 120 celdas 485Wp - Voc 42.88 V - Isc 14.39A /  Venta por pallet cerrado - 36 unidades por pallet", "price": 99.0, "iva": 0.105, "avail": "Disponible", "cat": "AMERISOLAR"}, {"id": 5, "model": "AS-7M144N-BHC-585W", "desc": "Panel Solar Fotovoltaico Bifacial Monocristalino tipo N 144 celdas 585Wp - Voc 51.4 V - Isc 14.29A /  Venta por pallet cerrado - 36 unidades por pallet", "price": 111.0, "iva": 0.105, "avail": "Disponible", "cat": "AMERISOLAR"}, {"id": 6, "model": "RSM144-9-585-BNDG", "desc": "Panel Solar Fotovoltaico Bifacial Monocristalino tipo N 144 celdas 585Wp - Voc 52.37 V - Isc 14.18A /  Venta por pallet cerrado - 36 unidades por pallet", "price": 108.0, "iva": 0.105, "avail": "Disponible", "cat": "RISEN"}, {"id": 7, "model": "RSM132-8-720-BHDG", "desc": "Panel Solar Fotovoltaico Bifacial tipo N HJT - Heterojunction Hyper-ion (patentado RISEN) 132 celdas 720Wp - Voc 50.18 V - Isc 18.19A /  Venta por pallet cerrado - 33 unidades por pallet", "price": 129.0, "iva": 0.105, "avail": "Disponible", "cat": "RISEN"}, {"id": 8, "model": "GW 3000-XS-11", "desc": "Ent. 500VCC/Sal. 3,000W, 220-230VCA/1 x MPPT/IP65/Wi-Fi", "price": null, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID MONOFÁSICOS"}, {"id": 9, "model": "GW 5000T-DS", "desc": "Ent. 600VCC/Sal. 5kW, 220-230 VCA/2 x MPPT/IP65/Wi-Fi", "price": null, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID MONOFÁSICOS"}, {"id": 10, "model": "GW 6000T-DS", "desc": "Ent. 600VCC/Sal. 6kW, 220-230 VCA/2 x MPPT/IP65/Wi-Fi", "price": 539.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID MONOFÁSICOS"}, {"id": 11, "model": "GW3300-XS-30", "desc": "3.3kW . 220V . WI-FI . Interruptor DC . DPS: III . AFCI . Display . IP66 . Oversize CC: 1 . MPPTs / Ent por MPPT: 1/1 . Tensión Start MPPT: 50 Vdc . Imp:16A . Garantía 10 años", "price": 337.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID MONOFÁSICOS"}, {"id": 12, "model": "GW6000-DNS-30", "desc": "6kW . 220V . WI-FI . Interruptor DC . DPS: III . AFCI . Display . IP66 . Oversize CC: 0.8 . MPPTs / Ent por MPPT: 2/1 . Tensión Start MPPT: 50 Vdc . Imp:16A . Garantía 10 años", "price": 528.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID MONOFÁSICOS"}, {"id": 13, "model": "GW 6000-MS-30", "desc": "6kW . 220V . WI-FI . Interruptor DC . DPS: II . Display . IP66 . Oversize CC: 0.8 . MPPTs / Ent por MPPT: 3/1 . Tensión Start MPPT: 50 Vdc . Imp:20A . Garantía 10 años", "price": 617.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID MONOFÁSICOS"}, {"id": 14, "model": "GW 8500-MS", "desc": "8.5kW . 220V . WI-FI . Interruptor DC . DPS: II . Display . IP66 . Oversize CC: 0.8 . MPPTs / Ent por MPPT: 3/1 . Tensión Start MPPT: 50 Vdc . Imp:20A . Garantía 5 años", "price": 699.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID MONOFÁSICOS"}, {"id": 15, "model": "GW 10K-MS", "desc": "10kW . 220V . WI-FI . Interruptor DC . DPS: II . Display . IP66 . Oversize CC: 0.8 . MPPTs / Ent por MPPT: 3/1 . Tensión Start MPPT: 50 Vdc . Imp:20A . Garantía 5 años", "price": 512.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID MONOFÁSICOS"}, {"id": 16, "model": "GW 3000-ES-20", "desc": "3kW . Hibrido . 220V  . WI-FI . Interruptor DC . DPS: II . IP65 . Oversize CC: 0.8 . MPPTs / Ent por MPPT: 2/1 . Tensión Start do MPPT: 60 Vdc . Imp:16A . Garantia: 10 años (5+*5) .       .", "price": 936.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS MONOFÁSICOS"}, {"id": 17, "model": "GW 6000M-ES-20", "desc": "6kW . Hibrido . 220V  . WI-FI . Interruptor DC . DPS: II . IP65 . Oversize CC: 0.8 . MPPTs / Ent por MPPT: 2/1 . Tensión Start do MPPT: 60 Vdc . Imp:16A . Garantia: 10 años (5+*5) .       .", "price": 1103.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS MONOFÁSICOS"}, {"id": 18, "model": "GW8000-ES-C10", "desc": "8kW . Hibrido . 220V  . WI-FI . Interruptor DC . DPS: III . Display . IP66 . Oversize CC: 1 . MPPTs / Ent por MPPT: 2/2-1 . Tensión Start do MPPT: 58 Vdc . Imp:16A . Garantia: 10 años (5+*5) .       .", "price": 1557.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS MONOFÁSICOS"}, {"id": 19, "model": "GW6000-EO", "desc": "6kW . Off-grid . 220V  . WI-FI . Interruptor CC . DPS: III . Display . IP21 . Oversize CC: 0.1 . MPPTs / Ent por MPPT: 1/2 . Tensión Start MPPT: 120 Vdc . Imp:15A . Garantia: 2 años .       .", "price": 685.0, "iva": 0.21, "avail": "Sin fecha", "cat": "GOODWE – INVERSORES OFF-GRID MONOFÁSICOS"}, {"id": 20, "model": "GW 6000-SDT-20", "desc": "Ent. 1,000VCC/Sal. 6kW, 400V 3L/N/T - 2 x MPPT 16A/IP65/Wi-Fi", "price": null, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 21, "model": "GW 8K-DT", "desc": "Ent. 1,000VCC/Sal. 8kW, 400V 3L/N/T - 2 x MPPT 12.5A/IP65/Wi-Fi", "price": null, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 22, "model": "GW 8000-SDT-20", "desc": "Ent. 1,000VCC/Sal. 8kW, 400V 3L/N/T - 2 x MPPT 15A/IP65/Wi-Fi", "price": null, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 23, "model": "GW 10KT-DT", "desc": "Ent. 1,000VCC/Sal. 10kW, 400V 3L/N/T - 2 x MPPT 12.5A/IP65/Wi-Fi", "price": null, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 24, "model": "GW 10K-SDT-20", "desc": "Ent. Max. 1,100VCC/Sal. 10kW, 380-400V 3L/N/T - 2 x MPPT 15A/IP65/Wi-Fi", "price": null, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 25, "model": "GW 10K-SDT-30", "desc": "10kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: III . Display: No . IP66 . Oversize CC: 0.8 . MPPTs / ENT por MPPT: 2/1 . Tensión Start MPPT: 160 Vdc . Imp:22A . Garantia: 10 años .       .", "price": 722.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 26, "model": "GW 15KT-DT", "desc": "Ent. 1,000VCC/Sal. 15kW, 400V 3L/N/T - 2 x MPPT 12.5A/IP65/Wi-Fi", "price": 799.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 27, "model": "GW 15K-SDT-30", "desc": "15kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: III . Display: No . IP66 . Oversize CC: 0.8 . MPPTs / ENT por MPPT: 2/1 . Tensión Start MPPT: 160 Vdc . Imp:22A . Garantia: 10 años (5+*5) .       .", "price": 869.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 28, "model": "GW 20KT-DT", "desc": "Ent. 1,100VCC/Sal. 20kW, 400V 3L/N/T - 2 x MPPT 25-25A/IP65/Wi-Fi", "price": null, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 29, "model": "GW 20K-SDT-30", "desc": "20kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: III . Display: No . IP66 . Oversize CC: 0.8 . MPPTs / ENT por MPPT: 2/2-1 . Tensión Start MPPT: 160 Vdc . Imp:16/22A . Garantia: 10 años (5+*5) .       .", "price": 1075.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 30, "model": "GW 25KT-DT", "desc": "Ent. 1,100VCC/Sal. 25kW, 400V 3L/N/T - 2 x MPPT 37.5-25A/IP65/Wi-Fi\"", "price": 885.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 31, "model": "GW 25K-MT", "desc": "Ent. 1,100VCC/Sal. 25kW/ 400 VAC 3L/N/T o 3L/T - 3 x MPPT 25A/IP65/Wi-Fi", "price": null, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 32, "model": "GW 25K-SDT-C30", "desc": "25kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: III . AFCI . IP66 . Oversize CC: 0.8 . MPPTs / ENT por MPPT: 2/2-1 . Tensión Start MPPT: 160 Vdc . Imp:21/22A . Garantia: 10 años (5+*5) .       .", "price": 1119.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 33, "model": "GW 30K-MT", "desc": "Ent. 1,100VCC/Sal. 30kW/ 400 VAC 3L/N/T o 3L/T - 3 x MPPT 25A/IP65/Wi-Fi", "price": 928.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 34, "model": "GW 30K-SDT-C30", "desc": "30kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI . IP66 . Oversize CC: 0.8 . MPPTs / ENT por MPPT: 3/2 . Tensión Start MPPT: 160 Vdc . Imp:21/16A . Garantia: 10 años (5+*5) .       .", "price": 1145.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 35, "model": "GW 33K-SDT-C30", "desc": "33kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI . IP66 . Oversize CC: 0.8 . MPPTs / ENT por MPPT: 3/2 . Tensión Start MPPT: 160 Vdc . Imp:21/16A . Garantia: 10 años (5+*5) .       .", "price": 1233.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 36, "model": "GW 36K-SDT-C30", "desc": "36kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI . IP66 . Oversize CC: 0.8 . MPPTs / ENT por MPPT: 3/2 . Tensión Start MPPT: 160 Vdc . Imp:21/16A . Garantia: 10 años (5+*5) .       .", "price": 1282.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 37, "model": "GW 36K-MT", "desc": "Ent. 1,100VCC/Sal. 36kW/ 400 VAC 3L/N/T o 3L/T - 3 x MPPT 30A/AFCI/IP65/Wi-Fi", "price": 998.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 38, "model": "GW50KS-MT", "desc": "50kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI . IP65 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 5/2 . Tensión Start MPPT: 180 Vdc . Imp:15A . Garantia: 10 años (5+*5) .       .", "price": 2067.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 39, "model": "GW 60KS-MT", "desc": "60kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI . IP65 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 6/2 . Tensión Start MPPT: 180 Vdc . Imp:15A . Garantia: 10 años (5+*5) .       .", "price": 2270.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 40, "model": "GW 75K-SMT", "desc": "75kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI . Plateado . IP66 . Oversize CC: 0.8 . MPPTs / ENT por MPPT: 6/2 . Tensión Start MPPT: 200 Vdc . Imp:21A . Garantia: 10 años (5+*5) .       .", "price": 2501.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 41, "model": "GW 80K-SMT", "desc": "80kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI . Palteado . IP66 . Oversize CC: 0.8 . MPPTs / ENT por MPPT: 6/2 . Tensión Start MPPT: 200 Vdc . Imp:21A . Garantia: 10 años (5+*5) .       .", "price": 2954.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 42, "model": "GW 100K-HT", "desc": "Ent. 1,100VCC/Sal. 100kW, 400, 3L/N/T ó 3L/T - 10 x MPPT con 2 strings 15A/IP66/Wi-Fi", "price": 3232.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 43, "model": "GW100K-GT", "desc": "100kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI - Plateado . IP66 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 8/2 . Tensión Start MPPT: 200 Vdc . Imp:21A . Garantia: 10 años (5+*5) .       .", "price": 3965.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 44, "model": "GW 110K-GT", "desc": "110kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI - Platado . IP66 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 10/2 . Tensión Start MPPT: 200 Vdc . Imp:21A . Garantia: 10 años (5+*5) .       .", "price": 4141.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 45, "model": "GW125K-GT", "desc": "125kW . On-grid . 380/400V . WI-FI . Interruptor .  DPS: II . AFCI - Plateado . IP66 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 10/2 . Tensión Start MPPT: 200 Vdc . Imp:21A . Garantia: 10 años (5+*5) .       .", "price": 4250.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES ON-GRID TRIFÁSICOS"}, {"id": 46, "model": "GW8000-ET-20 Híbrido FLEX", "desc": "8kW . Hibrido . 380/400V . WI-FI . DPS: II . AFCI . IP66 . Oversize CC: 0.5 . MPPTs / Ent por MPPT: 3/1 . Tensión Start MPPT: 150 Vdc . Imp:16A . Garantia: 10 años (5+*5) . 1 entrada para  Batería [hasta 230 kWh cuando se instala  Batería GoodWe Lynx F G2, hasta 40 kWh cuando se instyala  Batería Lynx D]. .", "price": 1196.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 47, "model": "GW8KN-ET", "desc": "8kW . Hibrido . 380/400V . WiFi . DSP:II . IP66 . MPPTS/ ENT POR MPPT: 2/1 . Tensión start MPPT: 180Vdc . Imp: 16A . Garantia: 5 años . Compaitble con baterias Pylontech.", "price": 899.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 48, "model": "GW 10K-ET-L-G10", "desc": "10kW . Hibrido . 380/400V . WI-FI . Iterruptor DC . SPD/DPS: II . AFCI . Blanco . Display . IP65 . Oversize CC: 1 . MPPTs / ENT por MPPT: 3/1 . Tensión Start MPPT: 180 Vdc . Imp:20A . Garantia: 10 años (5+*5)", "price": 2043.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 49, "model": "GW 12K-ET-20 Híbrido FLEX", "desc": "12kW . Hibrido . 380/400V . WI-FI . Interruptor DC . SPD/DPS: II . AFCI . Blanco . IP66 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 3/1 . Tensión Start MPPT: 150 Vdc . Imp:16A . Garantia: 10 años (5+*5) . 1 entrada para bateria [hasta 230 kWh cuando se usa bateria GoodWe Lynx F G2, hasta 40 kWh cuando se usa bateria Lynx D]", "price": 1230.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 50, "model": "GW 12K-ET-20", "desc": "12kW . Hibrido . 380/400V . WI-FI . DPS: II . AFCI . IP66 . Oversize CC: 0.5 . MPPTs / Ent por MPPT: 3/1 . Tensión Start MPPT: 150 Vdc . Imp:16A . Garantia: 10 años (5+*5) . 1 entrada para  Batería [hasta 230 kWh cuando se instala  Batería GoodWe Lynx F G2, hasta 40 kWh cuando se instyala  Batería Lynx D]. .", "price": 1527.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 51, "model": "GW15K-ET-20 Híbrido FLEX", "desc": "15kW . Hibrido . 380/400V . WI-FI . Interruptor DC . SPD/DPS: II . AFCI . Blanco . IP66 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 3/1 . Tensión Start MPPT: 150 Vdc . Imp:16A .  Garantia: 10 años (5+*5) . 1 entrada para bateria [hasta 230 kWh cuando se usa bateria GoodWe Lynx F G2, hasta 40 kWh cuando se usa bateria Lynx D]", "price": 1336.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 52, "model": "GW 15K-ET-20", "desc": "15kW . Hibrido . 380/400V . WI-FI . DPS: II . AFCI . IP66 . Oversize CC: 0.5 . MPPTs / Ent por MPPT: 3/1 . Tensión Start MPPT: 150 Vdc . Imp:16A . Garantia: 10 años (5+*5) . 1 entrada para  Batería [hasta 230 kWh cuando se instala  Batería GoodWe Lynx F G2, hasta 40 kWh cuando se instyala  Batería Lynx D]. .", "price": 1630.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 53, "model": "GW 15K-ET-L-G10", "desc": "15kW . Hibrido . 380/400V . WI-FI . Iterruptor DC . SPD/DPS: II . AFCI . Blanco . Display . IP65 . Oversize CC: 1 . MPPTs / ENT por MPPT: 4/1 . Tensión Start MPPT: 180 Vdc . Imp:20A . Garantia: 10 años (5+*5)", "price": 2555.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 54, "model": "GW 20K-ET Híbrido FLEX", "desc": "20kW . Hibrido . 380/400V . WI-FI . Interruptor DC . SPD/DPS: II . AFCI . Blanco . IP66 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 2/2 . Tensión Start MPPT: 200 Vdc . Imp:15A . Garantia: 10 años (5+*5) . 1 entrada para bateria [hasta 230 kWh cuando se usa bateria GoodWe Lynx F G2]", "price": 2838.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 55, "model": "GW 30K-ET Híbrido FLEX", "desc": "30kW . Hibrido . 380/400V . WI-FI . Interruptor DC . SPD/DPS: II . AFCI . Blanco . IP66 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 3/2 . Tensión Start MPPT: 200 Vdc . Imp:15A . Garantia: 10 años (5+*5) . 2 entradas para baterias [hasta 460 kWh cuando se usa bateria GoodWe Lynx F G2]", "price": 3482.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 56, "model": "Cód. Activ. Bat. GW….-ET-20", "desc": "Código para activación de ES G2 Híbrido FLEX", "price": 237.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 57, "model": "GW 50K-ET-10", "desc": "50kW . Hibrido . 380/400V . WI-FI . Interruptor DC . SPD/DPS: II . AFCI . Blanco . IP66 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 4/2 . Tensión Start MPPT: 160 Vdc . Imp:21/16A . Garantia: 10 años (5+*5) *** NO TIENE SALIDA DE BACKUP [ES NECESARIO UTILIZAR STS BOX STS200-80-10 PARA BACKUP] *** .", "price": 4385.0, "iva": 0.21, "avail": "Sin fecha", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 58, "model": "GW 100K-ET-G10", "desc": "100kW . Hibrido . 380/400V . WI-FI . Interruptor DC . SPD/DPS: II . AFCI . Plateado . IP66 . Oversize CC: 0.5 . MPPTs / ENT por MPPT: 8/2 . Tensión Start MPPT: 200 Vdc . Imp:21A . Garantia: 10 años (5+*5)  *** NO TEINE SALIDA DE BACKUP [ES NECESARIO UTILIZAR STS BOX GW125K-STS-G10 PARA BACKUP] *** .", "price": 5580.0, "iva": 0.21, "avail": "Sin fecha", "cat": "GOODWE – INVERSORES HÍBRIDOS TRIFÁSICOS"}, {"id": 59, "model": "CT90-5", "desc": "Transformador de Corriente  [TC] para control de exportación de inversores on-grid monofásicos en redes monofásicas. Abertura 16mm de diâmetro, capacidad 90A y cable de 5m, Ipn: 90 A, Iout: 90 mA.", "price": 51.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 60, "model": "CT90-30", "desc": "Transformador de Corriente  [TC] para control de exportación de inversores on-grid monofásicos en redes monofásicas. Abertura 16mm de diâmetro, capacidad 90A y cabñe de 30m, Ipn: 90 A, Iout: 90 mA.", "price": 94.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 61, "model": "CT250-3020", "desc": "Transformador de Corriente  [TC] - Ventana 30x20mm  - Capacidad 250A", "price": 122.82, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 62, "model": "CT250-6040", "desc": "Transformador de Corriente  [TC] Ventana 60x40mm - Capacidad 250A", "price": 188.62, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 63, "model": "CT1000-8040", "desc": "Transformador de Corriente  [TC] Ventana 80x40mm - Capacidad 1000A", "price": 236.87, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 64, "model": "GM 3000", "desc": "Medidor Inteligente trifásico para control de exportación de inversor único on-grid . Inlcuye 3 transformadores de Corriente [TC] de abertura 16mm y capacidade de 120A", "price": 236.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 65, "model": "GM330", "desc": "Medidor Inteligente trifásico para control de exportación de inversor trifásico único on-grid. No inlcuye transformadores de corriente [TC]. Compatible com TCs de hasta 5000A de relación /5", "price": 180.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 66, "model": "GM 3000C", "desc": "Medidor Inteligente trifásico para control de exportación de inversor único on-grid . No inlcuye transformadores de corriente [TC] . Compatble con TCs de hsata 5000A de razón /5", "price": 231.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 67, "model": "HK 3000 (16mm, 120A)", "desc": "Medidor Inteligente trifásico para monitoreo de consumo de cargas y/o control de exportación de inversor on-grid único. Inlcuye 3 Transformadores de Corrente [TC] de abertura 16mm y capacidad 120A. Conexión con ruteador: Wi-Fi e LAN", "price": 230.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 68, "model": "HK 3000 (24mm, 200A)", "desc": "Medidor Inteligente trifásico para monitoreo de consumo de cargas y/o control de exportación de inversor on-grid único. Inlcuye 3 Transformadores de Corrente [TC] de abertura 16mm y capacidad 200A. Conexión con ruteador: Wi-Fi e LAN", "price": 274.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 69, "model": "SEC1000", "desc": "Medidor inteligente para monitoreo y control de exportación y factor de potcncia de hsata 60 Inversores on-grid de hasta 120kW.  Conexión con inversores via cable RS-485. Conexión con ruteadores via LAN. 3 puertas RS485, salida con 1 Puerta Ethernet RJ45 10/100Mbps, IP65, tensión CA de linea soportada 100-480Vac", "price": 761.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 70, "model": "SEC3000C", "desc": "Medidor inteligente monitoreo control de exportación y factor de potencia de hasta 100 Inversores on-grid de hasta 125kW.  Conexión con inversores por medio de cable RS-485. Conexión con ruteador via LAN. 3 puertas RS485, salida con 2 puertas Ethernet RJ45 10/100Mbps . IP65 . Tensión CA de linea soportada 100-480Vac", "price": 1320.0, "iva": 0.21, "avail": "No publicar", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 71, "model": "EZ_Link", "desc": "Dongle Wi-Fi para paralelismo de ES G2 & ES Uniq - Para paralelismo en una única fase de hasta 3 inversores híbridos monofásicos de la linea ES G2 de 3.5 a 6kW", "price": 108.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 72, "model": "EZ_Link3000", "desc": "Dongle Wi-Fi para paralelismo y  monitoreo de hasta 4 inversores híbridos trifásicos de linea ET 15-30K", "price": 108.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 73, "model": "STS200-80-10", "desc": "Interruptpr de transferencia automática para conmutar entre modo on-grid y off-grid. Compatible con inversores ET 40-50K . Conexiones: 1 entrada para inversor (80A) , entrada/salida para red CA, salida para backup, entrada para Generador Diesel. Tiempo de comutación: <10ms . Suporta cargas hasta: 200A. Paralelismo de hasta 4 STS Boxes [incluyendo backup] . Protección: IP66 . Blanca", "price": 1410.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 74, "model": "GW125K-STS-G10", "desc": "Interruptor de transferencia automática para conmutación entre modo on-grid y off-grid de un único inversor híbrido de la linea ET 50-100K (modelos GW100K-ET-G10,  GW75K-ET-G10 o GW50K-ET-L-G10). Conexiones: 1 entrada para inversor (210A) , entrada/salida para red CA, salida para backup, entrada para Generador Diesel . Tiempo de comutación: <4ms . Soporta cargas hasta: 210A. Paralelismo no soportado . Protección: IP54. Prateada", "price": 2292.0, "iva": 0.21, "avail": "Sin fecha", "cat": "GOODWE – ACCESORIOS INVERSORES GOODWE"}, {"id": 75, "model": "LX U5.0-30", "desc": "Batería [51,2Vdc] de lítio ferrofosfato [LiFePO4] standalone. Protección IP65. Capacidad: 5.0kWh . Con supressor de incendios y calentador para células de  Batería. Paralelismo máx.: 6  Baterías [32,4kWh].", "price": 1195.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – BATERÍAS DE LITIO GOODWE BAJA TENSIÓN (51.2V)"}, {"id": 76, "model": "GW14.3-BAT-LV-G10", "desc": "Bateria [51,2Vdc] de lítio ferrofosfato [LiFePO4] standalone . Protección IP20. Plateada . Capacidad: 14.3kWh . Compatibilidad: lineas ES Uniq, ES-LD e ET-LV, . Paralelismo máx.: 16 baterias [32,4kWh]. Incluye supresor de incendios [aerosol] . C-rate de descarga: 0.94C . Incluye par de cables CC de 3m con sección 70mm² .  Incluye cable  de comunicación BMS de 3,5m con inversores . Incluye cable de puesta a tierra de 3m . Incluye un par de pines para izado manual .", "price": 3183.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – BATERÍAS DE LITIO GOODWE BAJA TENSIÓN (51.2V)"}, {"id": 77, "model": "LX D5.0-10", "desc": "Batería [435/380Vdc] de lítio ferrofosfato [LiFePO4] standalone. Protección IP66. Capacidad: 5.0kWh . Compatibilidad: GW6000-ET-20, GW8000-ET-20, GW10K-ET-20, GW12K-ET-20, GW15K-ET-20.  Ampliación: hasta 2 grupos de 4 baterías (20kWh) cada uno, permitiendo un total de hasta 8 baterías (40kWh).", "price": 1519.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – BATERÍAS DE LITIO GOODWE ALTA TENSIÓN"}, {"id": 78, "model": "Acc de pared Lynx D", "desc": "Permite instalar la batería de alta tensión GoodWe Lynx D sobre pared. Se pueden montar hasta 4 módulos de batería con un solo soporte de pared.", "price": 73.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – BATERÍAS DE LITIO GOODWE ALTA TENSIÓN"}, {"id": 79, "model": "Base para Lynx D", "desc": "El kit de montaje en piso GoodWe Lynx D permite colocar las unidades con una pequeña elevación sobre el suelo. Se pueden apilar un máximo de 4 módulos de batería sobre cada base de montaje.", "price": 154.0, "iva": 0.21, "avail": "Disponible", "cat": "GOODWE – BATERÍAS DE LITIO GOODWE ALTA TENSIÓN"}, {"id": 80, "model": "GW61.4-BAT-AC-G10", "desc": "Bateria HV [275-346Vdc] de lítio ferrofosfato [LiFePO4] standalone. Protección IP55. Plateada .Capacidad: 61.4kWh . Clase de protección C4 contra corrosión . Enfriamento por aire condicionado . Sistema de protección contra incendio: aerosol .  Compatibilidad: ET 40-50kW e ET 75-100kW (50K-LV). Paralelismo máx.: 4 baterias [245.6kWh]. C-rate de descarga: 1.1C", "price": 22398.0, "iva": 0.21, "avail": "Sin fecha", "cat": "GOODWE – BATERÍAS DE LITIO GOODWE ALTA TENSIÓN"}, {"id": 81, "model": "GW102.4-BAT-AC-G10", "desc": "Bateria HV [459-577Vdc] de lítio ferrofosfato [LiFePO4] standalone. Protección IP55. Plateada .Capacidad: 102.4kWh . Clase de protección C5 contra corrosión . Enfriamento por aire-condicionado . Sistema de protección de incendio: aerosol .  Compatibilidade: ET 40-50kW y ET 75-100kW (50K-LV). Paralelismo máx.: 4 baterias [409.6kWh]. C-rate de descarga: 1.1C", "price": 28439.0, "iva": 0.21, "avail": "Sin fecha", "cat": "GOODWE – BATERÍAS DE LITIO GOODWE ALTA TENSIÓN"}, {"id": 82, "model": "GW112.6-BAT-AC-G10", "desc": "Bateria HV [505-635Vdc] de lítio ferrofosfato [LiFePO4] standalone. Protección IP55. Plateada .Capacidad: 112.6kWh . Clase de protección C4 contra corrosión . Enfriamento por aire condicionado . Sistema de protección contra incendio: aerosol .  Compatibilidad: ET 40-50kW e ET 75-100kW (50K-LV). Paralelismo máx.: 4 baterias [490.4kWh]. C-rate de descarga: 1.1C", "price": 31208.0, "iva": 0.21, "avail": "Sin fecha", "cat": "GOODWE – BATERÍAS DE LITIO GOODWE ALTA TENSIÓN"}, {"id": 83, "model": "SPF 3000 TL HVM 24", "desc": "3kW/230VCA /Bat. litio o plomo-ácido /1 MPPT - Prioridad red o solar configurable/no paralelizable", "price": 370.0, "iva": 0.21, "avail": "Disponible", "cat": "GROWATT – INVERSORES OFF-GRID"}, {"id": 84, "model": "SPF 3000 TL HVM 48", "desc": "3kW/230VCA /Bat. litio o plomo-ácido /1 MPPT - Prioridad red o solar configurable/no paralelizable", "price": 370.0, "iva": 0.21, "avail": "Disponible", "cat": "GROWATT – INVERSORES OFF-GRID"}, {"id": 85, "model": "SPF 5000 TL HVM", "desc": "5kW/230VCA /Bat. litio o plomo-ácido /1 MPPT - çPrioridad red o solar configurable/no paralelizable", "price": null, "iva": 0.105, "avail": "Disponible", "cat": "GROWATT – INVERSORES OFF-GRID"}, {"id": 86, "model": "SPF 3500 ES", "desc": "3kW/230VCA /Bat. litio o plomo-ácido /1 MPPT/Puede funcionar sin batería Horario carga-descarga programable/Paralelizable hasta 30kW Apto red trifásica/Permite alim la carga desde la red y del campo FV al mismo tiempo", "price": null, "iva": 0.105, "avail": "Disponible", "cat": "GROWATT – INVERSORES OFF-GRID"}, {"id": 87, "model": "SPF 5000 ES", "desc": "5kW/230VCA /Bat. litio o plomo-ácido /1 MPPT/Puede funcionar sin batería Horario carga-descarga programable/Paralelizable hasta 30kW Apto red trifásica/Permite alim la carga desde la red y del campo FV al mismo tiempo", "price": null, "iva": 0.105, "avail": "Disponible", "cat": "GROWATT – INVERSORES OFF-GRID"}, {"id": 88, "model": "SPF 6000 ES Plus", "desc": "6kW/230VCA /Bat. litio o plomo-ácido /2 MPPT/Puede funcionar sin batería/WiFi incluido Horario carga-descarga programable/Paralelizable hasta 36kW Apto red trifásica/Permite alim la carga desde la red y del campo FV al mismo tiempo", "price": 516.0, "iva": 0.21, "avail": "Disponible", "cat": "GROWATT – INVERSORES OFF-GRID"}, {"id": 89, "model": "Shine WiFi Module", "desc": "Módulo Wi-Fi GROWATT para inversores off-Grid", "price": 40.0, "iva": 0.21, "avail": "Disponible", "cat": "GROWATT – ACCEESORIOS INVERSORES GROWATT"}, {"id": 90, "model": "Hope 4.8L-C1", "desc": "Compatibles con inversores GROWATT SPF X000 TL HVM y SPF XX00 ES Tensión nominal 48V - Cap nom 4800Wh/100Ah - Prof. desc 93%  - Garantía 5 años  Peso < 45kg - Comunic RS485, CAN", "price": null, "iva": 0.21, "avail": "", "cat": "GROWATT – BATERÍAS DE LITIO GROWATT"}, {"id": 91, "model": "Hope 4.8L-C1 KIT", "desc": "Kit de montaje y conexión batería Hope 4.8L-C1 - compuesto por soportes, tornillos, terminales, cables pot y control", "price": null, "iva": 0.21, "avail": "", "cat": "GROWATT – BATERÍAS DE LITIO GROWATT"}, {"id": 92, "model": "51.2NESR100", "desc": "Módulo de batería LFP  Tensión nominal 51.2V - Cap nom 5.12kWh - Prof. desc 95% - Vida útil +6000 ciclos Compatibilidad con inversores: Deye, Growatt, Voltronic, Must, Victron, Solis, SMA, Studer, etc. Corr. carga/desc. Normal 100A - Peso 42kg - Comunic RS485, CAN", "price": 999.0, "iva": 0.21, "avail": "Disponible", "cat": "NARADA – BAJA TENSIÓN 51.2V"}, {"id": 93, "model": "Kit cables 51.2NESR100 - 1m", "desc": "Par de canbles de potencia para conexión a inversor 25mm2, 1m", "price": 20.0, "iva": 0.21, "avail": "Disponible", "cat": "NARADA – BAJA TENSIÓN 51.2V"}, {"id": 94, "model": "Kit cables 51.2NESR100 - 0.6m", "desc": "Par de canbles de potencia para conexión a inversor 25mm2, 0.6m", "price": 14.0, "iva": 0.21, "avail": "Disponible", "cat": "NARADA – BAJA TENSIÓN 51.2V"}, {"id": 95, "model": "Soporte 51.2NESR100", "desc": "Conjunto de 2 soportes de montaje para módulo de batería 51.2NESR100", "price": 45.0, "iva": 0.21, "avail": "Disponible", "cat": "NARADA – BAJA TENSIÓN 51.2V"}, {"id": 96, "model": "RV12100", "desc": "Batería LPF multipropósito Tensión nominal 12.8V - Cap nom 1289Wh/100Ah - Prof. Desc: se desconecta llegando a 10V - Vida útil +4000 ciclos (25°C) - Peso 15kg.", "price": 399.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH"}, {"id": 97, "model": "RT12100G31", "desc": "Batería LPF multipropósito Tensión nominal 12.8V - Cap nom 1289Wh/100Ah - CAN, RS485, Bluetooth, Dry Contact - IP67 - Vida útil +4500 ciclos (25°C) - Peso 12kg.", "price": 636.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – BAJA TENSIÓN 12V"}, {"id": 98, "model": "US3000C", "desc": "Módulo de batería LFP Tensión nominal 48V - Cap nom 3550Wh/74Ah - Prof. desc 95% - Vida útil +6000 ciclos Peso 32kg - Comunic RS232, RS485, CAN", "price": 1129.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – BAJA TENSIÓN 48V"}, {"id": 99, "model": "US5000", "desc": "Módulo de batería LFP  Tensión nominal 48V - Cap nom 4.8kWh - Prof. desc 95% - Vida útil +8000 ciclos Corr. carga/desc. Normal 100A - Max. 121-200A @ 15seg.   Peso 39.7kg - Comunic RS 232, RS485, CAN", "price": 1379.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – BAJA TENSIÓN 48V"}, {"id": 100, "model": "UP5000", "desc": "Módulo de batería LFP  Tensión nominal 48V - Cap nom 4.8kWh - Prof. desc 95% - Vida útil +6000 ciclos Corr. carga/desc. Normal 50A - Max. 95-200A @ 15seg.   Peso 40kg - Comunic RS 232, RS485, CAN", "price": 1173.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – BAJA TENSIÓN 48V"}, {"id": 101, "model": "UF5000", "desc": "Módulo de batería LFP  Tensión nominal 51.2V - Cap nom 5.12kWh - Prof. desc 95% - Vida útil +6000 ciclos Corr. carga/desc. Normal 100A - Max. 121-200A @ 15seg.   Peso 42kg - Comunic RS 232, RS485, CAN", "price": 1087.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – BAJA TENSIÓN 51.2V"}, {"id": 102, "model": "FIDUS - FB-L-5.12", "desc": "FIDUS Módulo de batería LFP Tensión nominal 51.2V - Cap nom 5.12kWh - Prof. desc 97% - Vida útil +6000 ciclos Corr. carga/desc. Normal 100A - Max. 121-200A @ 15seg.   IP65 - Peso 45kg - Comunic RS485, CAN", "price": 1279.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – BAJA TENSIÓN 51.2V"}, {"id": 103, "model": "Soporte US2", "desc": "Conjunto de 2 soportes de montaje para módulo de batería US2000", "price": 53.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – ACCEESORIOS BATERÍAS PYLONTECH BAJA TENSIÓN"}, {"id": 104, "model": "Soporte US3", "desc": "Conjunto de 2 soportes de montaje para módulo de batería US3000/3000C", "price": 53.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – ACCEESORIOS BATERÍAS PYLONTECH BAJA TENSIÓN"}, {"id": 105, "model": "Soporte US5", "desc": "Conjunto de 2 soportes de montaje para módulo de batería US5000", "price": 53.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – ACCEESORIOS BATERÍAS PYLONTECH BAJA TENSIÓN"}, {"id": 106, "model": "Kit cables US", "desc": "Potencia 2 x 2m (positivo y negativo) + Comun. 1 x 3.5m RJ45 (no apto CAN)", "price": 110.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – ACCEESORIOS BATERÍAS PYLONTECH BAJA TENSIÓN"}, {"id": 107, "model": "H48050", "desc": "Módulo de batería LFP  Tensión nominal 48V - Cap nom 2400Wh/50Ah - Prof. desc 90% - Vida útil +6000 ciclos (25°C) - Peso 24kg - Comunic RS 232, RS485, CAN", "price": null, "iva": 0.21, "avail": "", "cat": "PYLONTECH – BATERÍAS DE LITIO PYLONTECH ALTA TENSIÓN"}, {"id": 108, "model": "SC0500-100S", "desc": "Módulo de control (BMS) para baterías Pylontech de alta tensión H48050 Tensión de operación 100/430V - Corriente de carga/descarga (Max.) 100A Tensión de descarga 100/430 V - Comunicación RS485/CAN", "price": null, "iva": 0.21, "avail": "", "cat": "PYLONTECH – BATERÍAS DE LITIO PYLONTECH ALTA TENSIÓN"}, {"id": 109, "model": "H48074", "desc": "Módulo de Batería LFP Tensión nominal 48V - Cap nom 3550Wh/74Ah - Prof. desc 90% - Vida útil +6000 ciclos (25°C) - Peso 35kg - Comunic RS 232, RS485, CAN", "price": 943.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – BATERÍAS DE LITIO PYLONTECH ALTA TENSIÓN"}, {"id": 110, "model": "SC1000-100S", "desc": "Módulo de control (BMS) para baterías PYLONTECH de alta tensión H48074 Tensión de operación 200/1000V - Corriente de carga/descarga (Max.) 100A Tensión de descarga 200/1000 V - Comunicación Modbus RTU/CAN", "price": 595.0, "iva": 0.21, "avail": "Disponible", "cat": "PYLONTECH – BATERÍAS DE LITIO PYLONTECH ALTA TENSIÓN"}, {"id": 111, "model": "J5500HP", "desc": "5.5kW/230VCA /Bat. litio o plomo-ácido /1 MPPT/Puede funcionar sin batería/Paralelizable hasta 12 unidades (61kW)/Apto red trifásica/Permite alim la carga desde la red y del campo FV al mismo tiempo", "price": 580.0, "iva": 0.21, "avail": "", "cat": "JSD SOLAR – INVERSORES OFF-GRID MONOFÁSICOS"}, {"id": 112, "model": "J5500HPC", "desc": "5.5kW/230VCA /Bat. litio o plomo-ácido /1 MPPT/Puede funcionar sin batería/Paralelizable hasta 9 unidades (49.5kW)/Apto red trifásica/Permite alim la carga desde la red y del campo FV al mismo tiempo", "price": 447.0, "iva": 0.21, "avail": "Disponible", "cat": "JSD SOLAR – INVERSORES OFF-GRID MONOFÁSICOS"}, {"id": 113, "model": "J6200HP", "desc": "6.2kW/230VCA /Bat. litio o plomo-ácido /1 MPPT/Puede funcionar sin batería/Paralelizable hasta 12 unidades (74.4kW)/Apto red trifásica/Permite alim la carga desde la red y del campo FV al mismo tiempo", "price": 464.0, "iva": 0.21, "avail": "Disponible", "cat": "JSD SOLAR – INVERSORES OFF-GRID MONOFÁSICOS"}, {"id": 114, "model": "J6500HC", "desc": "6.5kW/230VCA /Bat. litio o plomo-ácido /1 MPPT/Puede funcionar sin batería/ Apto red trifásica/Permite alim la carga desde la red y del campo FV al mismo tiempo/Wi-Fi incorporado", "price": 512.0, "iva": 0.21, "avail": "Disponible", "cat": "JSD SOLAR – INVERSORES OFF-GRID MONOFÁSICOS"}, {"id": 115, "model": "J11000H-W", "desc": "11kW/230VCA /Bat. litio o plomo-ácido /2 MPPT/Puede funcionar sin batería/No paralelizable/Apto red trifásica/Permite alim la carga desde la red y del campo FV al mismo tiempo - WiFi incorporado", "price": 789.0, "iva": 0.21, "avail": "Disponible", "cat": "JSD SOLAR – INVERSORES OFF-GRID MONOFÁSICOS"}, {"id": 116, "model": "Wi-Fi Plug Pro 05", "desc": "Módulo Wi-Fi para inversores off-grid JSD SOLAR J5500HPC", "price": 47.0, "iva": 0.21, "avail": "Disponible", "cat": "JSD SOLAR – ACCESORIOS INVERSORES JSD SOLAR"}, {"id": 117, "model": "Wi-Fi Plug Pro", "desc": "Módulo Wi-Fi para inversores off-grid JSD SOLAR J6200HP / J11000H", "price": 47.0, "iva": 0.21, "avail": "Disponible", "cat": "JSD SOLAR – ACCESORIOS INVERSORES JSD SOLAR"}, {"id": 118, "model": "BG48100", "desc": "Móduo de batería LPF Con display frontal - Incluye kit de montaje en pared - Compatibles con inversores JSD Solar, MPP Solar, SMA, Goodwe, Victron, Voltronic, Huawei, Solis, INVT, Schneider, etc. Tensión nominal 51.2V - Cap 5000Wh/100Ah - Prof. desc 93%  - Vida +6000 ciclos - Garantía 5 años - Com. RS485, CAN - Peso neto 46 kg/bruto 48.5 kg", "price": 1145.0, "iva": 0.21, "avail": "desde 20/11/2025", "cat": "JSD SOLAR – BATERÍAS DE LITIO JSD SOLAR"}, {"id": 119, "model": "J4U48100", "desc": "Módulo de batería LPF Rackeable, incluye kit de montaje - Compatibles con inversores JSD Solar, MPP Solar, SMA, Goodwe, Victron, Voltronic, Huawei, Solis, INVT, etc. Tensión nominal 51.2V - Cap nom 5000Wh/100Ah - Vida útil +6000 ciclos - Garantía 5 años - Comunic RS232, RS485, CAN - Peso neto 42.5 kg", "price": 993.0, "iva": 0.21, "avail": "Disponible", "cat": "JSD SOLAR – BATERÍAS DE LITIO JSD SOLAR"}, {"id": 120, "model": "BHS-1/1 OL", "desc": "Protección de sobrecarga PV  1 entrada/1 salida - 292 x 220 x 120mm - Tensión max 1000VCC - IP 65 - Policarbonato - Montaje en pared - Temp -20°C/+60°C - Humedad 99% - Altura 2000m", "price": 116.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – STRING BOX/CAJA DE CONJUNCIÓN - Plug & Play"}, {"id": 121, "model": "BHS-1/1", "desc": "String-box 1 entrada/1 salida - 292 x 220 x 120mm - Tensión max 1000VCC - IP 65 - Policarbonato - Montaje en pared - Temp -20°C/+60°C - Humedad 99% - Altura 2000m", "price": 117.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – STRING BOX/CAJA DE CONJUNCIÓN - Plug & Play"}, {"id": 122, "model": "BHS-2/1", "desc": "String-box 2 entradas/1 salida - 292 x 220 x 120mm - Tensión max 1000VCC - IP 65 - Policarbonato - Montaje en pared - Temp -20°C/+60°C - Humedad 99% - Altura 2000m", "price": 129.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – STRING BOX/CAJA DE CONJUNCIÓN - Plug & Play"}, {"id": 123, "model": "BHS-2/2", "desc": "String-box 2 entradas/2 salidas - 292 x 370 x 132mm -Tensión max 1000VCC - IP 65 - Policarbonato - Montaje en pared - Temp -20°C/+60°C - Humedad 99% - Altura 2000m", "price": 177.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – STRING BOX/CAJA DE CONJUNCIÓN - Plug & Play"}, {"id": 124, "model": "BHS-4/2", "desc": "String-box 4 entradas/2 salidas - 292 x 370 x 132mm - Tensión max 1000VCC - IP 65 - Policarbonato - Montaje en pared - Temp -20°C/+60°C - Humedad 99% - Altura 2000m", "price": 195.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – STRING BOX/CAJA DE CONJUNCIÓN - Plug & Play"}, {"id": 125, "model": "BYT.2-32", "desc": "Seccionador rotativo CC - 1200VCC - 32A - 4 polos - Uimp 8kV - IP20 - Riel DIN", "price": 18.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – SECCIONADORES BAJO CARGA CC FV"}, {"id": 126, "model": "BB1H-63 2P", "desc": "Seccionador basculante CC - 600VCC - 25A - 2 polos - Uimp 8kV - IP20 - Riel DIN", "price": 11.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – SECCIONADORES BAJO CARGA CC FV"}, {"id": 127, "model": "BB1H-63 - 4P", "desc": "Seccionador basculante CC - 1200VCC - 40A - 4 polos - Uimp 8kV - IP20 - Riel DIN", "price": 22.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – SECCIONADORES BAJO CARGA CC FV"}, {"id": 128, "model": "BB1-63-2P", "desc": "Interruptor TM CC - 25A - 2Polos - Tensión de trabajo 600VCC - Uimp 6kV - Capacidad de Corte 6kA - IP20 - Riel DIN", "price": 12.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – INTERRUPTORES TM CC FV"}, {"id": 129, "model": "BB1-63-4P", "desc": "Interruptor TM CC - 4oA - 4Polos- Tensión de trabajo 1200VCC - Uimp 6kV - Capacidad de Corte 8kA - IP20 - Riel DIN", "price": 25.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – INTERRUPTORES TM CC FV"}, {"id": 130, "model": "BB2-40-2P", "desc": "Interruptor TM CC - 40A - 2Polos - Tensión de trabajo 1000VCC - Uimp 8kV - Capacidad de Corte 1.5kA - IP20 - Riel DIN", "price": 18.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – INTERRUPTORES TM CC FV"}, {"id": 131, "model": "BDM 125", "desc": "Interruptor TM CC - 2Polos - Tensión nominal 500V - Corriente nominal 125A - Uimp 8kV - Ics 15kA - IP20", "price": 87.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – INTERRUPTORES TM CC FV"}, {"id": 132, "model": "BDM 125 IP65", "desc": "Interruptor TM CC IP65 - 2Polos - Tensión nominal 500V - Corriente nominal 125A - Uimp 8kV - Ics 15kA", "price": 103.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – INTERRUPTORES TM CC FV"}, {"id": 133, "model": "BDM 250", "desc": "Interruptor TM CC - 2Polos - Tensión nominal 500V - Corriente nominal 250A - Uimp 8kV - Ics 15kA - IP20", "price": 97.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – INTERRUPTORES TM CC FV"}, {"id": 134, "model": "BDM 250 IP65", "desc": "Interruptor TM CC - 2Polos - Tensión nominal 500V - Corriente nominal 250A - Uimp 8kV - Ics 15kA", "price": 117.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – INTERRUPTORES TM CC FV"}, {"id": 135, "model": "BUD-40-2", "desc": "Descargador de CC - 2Polos - Tipo 2 - Tensión de trabajo 600VCC - Imax 40kA - Up ≤2kV - Riel DIN", "price": 22.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – DESCARGADORES CC FV"}, {"id": 136, "model": "BUD-40-3", "desc": "Descargador de CC - 3Polos - Tipo 2 - Tensión de trabajo 1000VCC - Imax 40kA - Up ≤3.8kV - Riel DIN", "price": 24.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – DESCARGADORES CC FV"}, {"id": 137, "model": "BUD-1500", "desc": "Descargador de CC - 3Polos - Tipo 2 - Tensión de trabajo 1500VCC - Imax 40kA - Up ≤5.5kV - Riel DIN", "price": 39.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – DESCARGADORES CC FV"}, {"id": 138, "model": "BR-30", "desc": "Base portafusible FV unipolar - 1000V - 30A - Fusible 10 x 38 - IP20 - Indicador de falla - Riel DIN", "price": 3.5, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – FUSIBLES & PORTAFUSIBLES CC FV"}, {"id": 139, "model": "OSVP_30L", "desc": "Base portafusible FV unipolar - 1500V - 32A - Fusible 10 x 85 - IP20 - Riel DIN", "price": 5.8, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – FUSIBLES & PORTAFUSIBLES CC FV"}, {"id": 140, "model": "OSVP30 15A", "desc": "Fusible tipo gPV - 1000VDC - 15A - 10 x 38mm", "price": 1.5, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – FUSIBLES & PORTAFUSIBLES CC FV"}, {"id": 141, "model": "OSVP30 20A", "desc": "Fusible tipo gPV - 1000VDC - 20A - 10 x 38mm", "price": 1.5, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – FUSIBLES & PORTAFUSIBLES CC FV"}, {"id": 142, "model": "OSVP30L 15A", "desc": "Fusible tipo gPV - 1500VDC - 15A - 10 x 85mm", "price": 6.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – FUSIBLES & PORTAFUSIBLES CC FV"}, {"id": 143, "model": "OSVP30L 20A", "desc": "Fusible tipo gPV - 1500VDC - 20A - 10 x 85mm", "price": 6.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – FUSIBLES & PORTAFUSIBLES CC FV"}, {"id": 144, "model": "BUA-40-2P", "desc": "Descargador de CA - 2Polos - Tipo 2 - Tensión max. de trabajo 275VCA - Imax 40kA - Up ≤1.5kV - Riel DIN", "price": 12.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – DESCARGADORES CA BT"}, {"id": 145, "model": "BUA-40-4P", "desc": "Descargador de CA - 3Polos - Tipo 2 - Tensión max. de trabajo 385VCA - Imax 40kA - Up ≤1.8kV - Riel DIN", "price": 26.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – DESCARGADORES CA BT"}, {"id": 146, "model": "BB1LE-63 2P 25A 30mA", "desc": "Disyuntor Diferencial CA - 1P+N - 230VAC - 25A - 30mA - Icc 10kA - Uimp 6kV - IP20 - Riel DIN", "price": 56.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – DISYUNTOR DIFERENCIAL CA BT"}, {"id": 147, "model": "BB1LE-63 2P 40A 30mA", "desc": "Disyuntor Diferencial CA - 1P+N - 230VAC - 40A - 30mA - Icc 10kA - Uimp 6kV - IP20 - Riel DIN", "price": 56.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – DISYUNTOR DIFERENCIAL CA BT"}, {"id": 148, "model": "BB1LE-63 4P 40A 30mA", "desc": "Disyuntor Diferencial CA - 3P+N - 400/415VAC - 40A - 30mA - Icc 10kA - Uimp 6kV - IP20 - Riel DIN", "price": 77.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – DISYUNTOR DIFERENCIAL CA BT"}, {"id": 149, "model": "BB1LE-63 4P 63A 100mA", "desc": "Disyuntor Diferencial CA - 3P+N - 400/415VAC - 63A - 30mA - Icc 10kA - Uimp 6kV - IP20 - Riel DIN", "price": 77.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – DISYUNTOR DIFERENCIAL CA BT"}, {"id": 150, "model": "QC4.10-cd", "desc": "Par MC4 (m/h) – Cobre estañado - Un 1500V – In 80A – h/ 16mm2 – IP68 (h/ 1h) /IP65 - R ≤ 0.5mΩ – Tmax 115℃ - Ui 16KV", "price": 2.25, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CONECTORES MC4"}, {"id": 151, "model": "QC4.Y", "desc": "Par MC4 tipo branch 2 entradas y 1 salida (2m y 1h + 1m y 2h) - Un 1500V – In 50A – IP68 - R ≤ 0.5mΩ – Tmax 85℃", "price": 9.5, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CONECTORES MC4"}, {"id": 152, "model": "Cable FV 4mm2 - Negro - 100m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 97.66, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}, {"id": 153, "model": "Cable FV 4mm2 - Rojo - 100m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 97.66, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}, {"id": 154, "model": "Cable FV 4mm2 - Negro - 250m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 244.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}, {"id": 155, "model": "Cable FV 4mm2 - Rojo - 250m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 244.0, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}, {"id": 156, "model": "Cable FV 4mm2 - Negro - 1000m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 976.56, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}, {"id": 157, "model": "Cable FV 4mm2 - Rojo - 1000m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 976.56, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}, {"id": 158, "model": "Cable FV 6mm2 - Negro - 100m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 146.48, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}, {"id": 159, "model": "Cable FV 6mm2 - Rojo - 100m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 146.48, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}, {"id": 160, "model": "Cable FV 6mm2 - Negro - 250m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 366.21, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}, {"id": 161, "model": "Cable FV 6mm2 - Rojo - 250m", "desc": "Certificación IEC 62930 – Tipo H1Z2Z2-K - Tensión de operación hasta 1500VCC – Tensión soportada 6.5 kV AC / 5 min – UV resist – Halogen free – Temp. –40 °C a +90 °C", "price": 366.21, "iva": 0.21, "avail": "Disponible", "cat": "ZJBENY - Protección & Maniobra CC/CA – CABLE FV"}];
+
+let products = loadProducts();
+let cart = [];
+let currentPage = 1;
+let filtered = [];
+
+function loadProducts() {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    return s ? JSON.parse(s) : DEFAULT_PRODUCTS;
+  } catch { return DEFAULT_PRODUCTS; }
+}
+
+function saveProducts() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  renderAdmin();
+  filterProducts();
+  alert('✅ Cambios guardados correctamente.');
+}
+
+function resetProducts() {
+  if (!confirm('¿Restaurar la lista original? Se perderán los cambios guardados.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  products = [...DEFAULT_PRODUCTS];
+  filterProducts();
+  renderAdmin();
+  alert('✅ Lista restaurada.');
+}
+
+// ── DISCOUNT CURVE ──
+const PUNTOS = [[0,0],[1999,0],[2000,2],[4000,4.22],[6500,7],[10000,8.11],[13000,9.05],[16000,10]];
+function getDiscount(total) {
+  if (total <= 0) return 0;
+  if (total >= 16000) return 10;
+  for (let i = 1; i < PUNTOS.length; i++) {
+    const [x0,d0]=PUNTOS[i-1],[x1,d1]=PUNTOS[i];
+    if (total >= x0 && total <= x1) return d0 + (total-x0)/(x1-x0)*(d1-d0);
+  }
+  return 0;
+}
+
+// ── PAYMENT METHOD ──
+const PAY_METHODS = {
+  'trans-ars':      { label:'Transferencia bancaria (ARS)',   baseDeduction:0,    perDay:0,    usdBonus:false },
+  'echeck-propio':  { label:'e-check propio',                 baseDeduction:0.70, perDay:0.08, usdBonus:false },
+  'cheque-fisico':  { label:'Cheque propio físico',           baseDeduction:1.40, perDay:0.08, usdBonus:false },
+  'echeck-terceros':{ label:'e-check de terceros',            baseDeduction:1.90, perDay:0.08, usdBonus:false },
+  'usd-trans':      { label:'Transferencia / depósito USD',   baseDeduction:0,    perDay:0,    usdBonus:true  },
+};
+
+let isUsdMode = false;
+const payMix = {
+  'trans-ars':      { active: true,  pct: 100, days: 0  },
+  'echeck-propio':  { active: false, pct: 0,   days: 30 },
+  'cheque-fisico':  { active: false, pct: 0,   days: 30 },
+  'echeck-terceros':{ active: false, pct: 0,   days: 30 },
+};
+
+function toggleUsdMode(on) {
+  isUsdMode = on;
+  document.getElementById('pay-usd-opt').classList.toggle('selected', on);
+  document.getElementById('pay-mix-section').style.display = on ? 'none' : '';
+  renderCart();
+}
+
+function togglePayMethod(key, newState) {
+  payMix[key].active = newState;
+  document.getElementById('pmr-' + key).classList.toggle('active', newState);
+  document.getElementById('pmi-' + key).style.display = newState ? 'flex' : 'none';
+  if (!newState) {
+    payMix[key].pct = 0;
+    document.getElementById('pm-pct-' + key).value = 0;
+    document.getElementById('pm-amt-' + key).value = '';
+  }
+  updateAllocBar();
+  renderCart();
+}
+
+function updatePayPct(key, val) {
+  let pct = Math.max(0, Math.min(100, parseFloat(val) || 0));
+  payMix[key].pct = pct;
+  // Sync amount
+  const total = getCartTotal();
+  if (total > 0) document.getElementById('pm-amt-' + key).value = (total * pct / 100).toFixed(2);
+  updateAllocBar();
+  renderCart();
+}
+
+function updatePayAmt(key, val) {
+  const total = getCartTotal();
+  if (total <= 0) return;
+  const amt = Math.max(0, parseFloat(val) || 0);
+  const pct = Math.min(100, amt / total * 100);
+  payMix[key].pct = pct;
+  document.getElementById('pm-pct-' + key).value = pct.toFixed(1);
+  updateAllocBar();
+  renderCart();
+}
+
+function updatePayDays(key, val) {
+  payMix[key].days = Math.min(60, Math.max(1, parseInt(val) || 30));
+  renderCart();
+}
+
+function getCartTotal() {
+  let sub = 0, iva = 0;
+  cart.forEach(p => { sub += p.price * p.qty; iva += p.price * p.qty * p.iva; });
+  return sub + iva;
+}
+
+function updateAllocBar() {
+  const total = Object.values(payMix).filter(m => m.active).reduce((s, m) => s + m.pct, 0);
+  const pct = Math.min(total, 100);
+  const fill = document.getElementById('pay-alloc-fill');
+  const lbl  = document.getElementById('pay-alloc-label');
+  fill.style.width = pct + '%';
+  if (Math.abs(total - 100) < 0.1) {
+    fill.style.background = '#22c55e';
+    lbl.className = 'pay-alloc-label ok';
+    lbl.innerHTML = '<span>Asignado</span><span>100% ✓</span>';
+  } else if (total > 100) {
+    fill.style.background = '#ef4444';
+    lbl.className = 'pay-alloc-label over';
+    lbl.innerHTML = `<span>Asignado</span><span>${total.toFixed(1)}% — excede 100%</span>`;
+  } else {
+    fill.style.background = '#f59e0b';
+    lbl.className = 'pay-alloc-label';
+    lbl.innerHTML = `<span>Asignado</span><span>${total.toFixed(1)}% — faltan ${(100 - total).toFixed(1)}%</span>`;
+  }
+}
+
+function syncAmounts() {
+  const total = getCartTotal();
+  if (total <= 0) return;
+  Object.keys(payMix).forEach(key => {
+    if (payMix[key].active) {
+      document.getElementById('pm-amt-' + key).value = (total * payMix[key].pct / 100).toFixed(2);
+    }
+  });
+}
+
+function getPayInfo() {
+  if (isUsdMode) {
+    return { totalDeduction: 0, usdBonus: true, isValid: true, label: 'Transferencia / depósito USD', parts: [] };
+  }
+  const activeParts = Object.entries(payMix)
+    .filter(([, m]) => m.active && m.pct > 0)
+    .map(([key, m]) => {
+      const pm = PAY_METHODS[key];
+      const days = Math.min(60, Math.max(1, m.days || 0));
+      const ded = pm.baseDeduction + days * pm.perDay;
+      return { key, pm, pct: m.pct, days, ded };
+    });
+  const totalPct = activeParts.reduce((s, p) => s + p.pct, 0);
+  const totalDeduction = activeParts.reduce((s, p) => s + (p.pct / 100) * p.ded, 0);
+  const isValid = Math.abs(totalPct - 100) < 0.1 && activeParts.length > 0;
+  const label = activeParts.map(p => `${p.pm.label} (${p.pct.toFixed(0)}%)`).join(' + ');
+  return { totalDeduction, usdBonus: false, isValid, label, parts: activeParts };
+}
+
+// ── FORMAT ──
+function fmtUSD(n) {
+  return 'USD ' + n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+// ── CATEGORIES ──
+function getCategories() {
+  return [...new Set(products.map(p=>p.cat))].sort();
+}
+
+function populateCatFilter() {
+  const sel = document.getElementById('cat-filter');
+  const val = sel.value;
+  sel.innerHTML = '<option value="">Todas las categorías</option>';
+  getCategories().forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    if (c === val) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+// ── FILTER & RENDER PRODUCTS ──
+function filterProducts() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const cat = document.getElementById('cat-filter').value;
+  filtered = products.filter(p => {
+    const matchCat = !cat || p.cat === cat;
+    const matchQ = !q || p.model.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  currentPage = 1;
+  renderProducts();
+}
+
+function renderProducts() {
+  const tbody = document.getElementById('prod-tbody');
+  const placeholder = document.getElementById('prod-placeholder');
+  const tableWrap = document.getElementById('prod-table-wrap');
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const start = (currentPage-1)*PAGE_SIZE;
+  const slice = filtered.slice(start, start+PAGE_SIZE);
+
+  const q = document.getElementById('search').value.trim();
+  const cat = document.getElementById('cat-filter').value;
+  const isFiltering = q || cat;
+
+  if (!isFiltering) {
+    placeholder.style.display = '';
+    tableWrap.style.display = 'none';
+    document.getElementById('prod-count').textContent = '';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  tableWrap.style.display = '';
+  document.getElementById('prod-count').textContent = `${total} de ${products.length} productos`;
+
+  tbody.innerHTML = '';
+
+  if (total === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="5" style="text-align:center;padding:2rem;color:var(--s400);font-size:.88rem">
+      Sin resultados para la búsqueda actual.
+      <button onclick="clearFilters()" style="background:none;border:none;color:var(--b600);cursor:pointer;text-decoration:underline;font-size:.88rem">Limpiar filtros</button>
+    </td>`;
+    tbody.appendChild(tr);
+    renderPagination(0);
+    return;
+  }
+
+  let lastCat = '';
+  slice.forEach(p => {
+    if (p.cat !== lastCat) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td colspan="5" class="section-title">${p.cat}</td>`;
+      tbody.appendChild(tr);
+      lastCat = p.cat;
+    }
+    const inCart = cart.find(c=>c.id===p.id);
+    const priceNet = p.price;
+    const priceIva = priceNet ? priceNet * (1 + p.iva) : null;
+    const isPanel = p.cat.includes('AMERISOLAR') || p.cat.includes('RISEN') || p.desc.toLowerCase().includes('pallet');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="td-model">${p.model}${isPanel?'<span class="tag-panel">pallet</span>':''}</td>
+      <td class="td-desc" title="${p.desc.replace(/"/g,'&quot;')}">${p.desc.substring(0,80)}${p.desc.length>80?'…':''}</td>
+      <td class="td-price">${priceIva ? fmtUSD(priceIva) : '<span class="no-price">Consultar</span>'}</td>
+      <td class="td-avail"><span class="${p.avail==='Disponible'?'av-ok':'av-no'}">${p.avail||'—'}</span></td>
+      <td class="td-add">
+        ${priceNet && p.avail === 'Disponible' ? `<div class="qty-wrap">
+          <button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button>
+          <input class="qty-inp" id="qty-${p.id}" type="number" min="1" value="${inCart?inCart.qty:1}"/>
+          <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
+        </div>
+        <button class="btn-add ${inCart?'added':''}" onclick="addToCart(${p.id})" style="margin-top:4px">
+          ${inCart?'✓ En pedido':'+ Agregar'}
+        </button>` : priceNet ? '<span class="no-price">Sin stock</span>' : '<span class="no-price">Sin precio</span>'}
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  renderPagination(pages);
+}
+
+function clearFilters() {
+  document.getElementById('search').value = '';
+  document.getElementById('cat-filter').value = '';
+  filterProducts();
+}
+
+function changeQty(id, delta) {
+  const inp = document.getElementById('qty-'+id);
+  if (!inp) return;
+  let v = parseInt(inp.value)||1;
+  v = Math.max(1, v+delta);
+  inp.value = v;
+  const ci = cart.findIndex(c=>c.id===id);
+  if (ci > -1) { cart[ci].qty = v; renderCart(); }
+}
+
+function renderPagination(pages) {
+  const div = document.getElementById('pagination');
+  if (pages <= 1) { div.innerHTML=''; return; }
+  let h = '';
+  if (currentPage > 1) h += `<button class="page-btn" onclick="goPage(${currentPage-1})">‹</button>`;
+  const range = [];
+  for (let i=1;i<=pages;i++) {
+    if (i===1||i===pages||Math.abs(i-currentPage)<=2) range.push(i);
+    else if (range[range.length-1]!=='…') range.push('…');
+  }
+  range.forEach(r => {
+    if (r==='…') h+=`<span style="padding:0 4px;color:var(--s400)">…</span>`;
+    else h+=`<button class="page-btn ${r===currentPage?'active':''}" onclick="goPage(${r})">${r}</button>`;
+  });
+  if (currentPage < pages) h += `<button class="page-btn" onclick="goPage(${currentPage+1})">›</button>`;
+  h += `<span class="page-info">Pág. ${currentPage}/${pages}</span>`;
+  div.innerHTML = h;
+}
+
+function goPage(n) { currentPage=n; renderProducts(); window.scrollTo(0,0); }
+
+// ── CART ──
+function addToCart(id) {
+  const p = products.find(x=>x.id===id);
+  if (!p || !p.price || p.avail !== 'Disponible') return;
+  const inp = document.getElementById('qty-'+id);
+  const qty = inp ? Math.max(1,parseInt(inp.value)||1) : 1;
+  const ci = cart.findIndex(c=>c.id===id);
+  if (ci > -1) cart[ci].qty = qty;
+  else cart.push({...p, qty});
+  renderCart();
+  renderProducts();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(c=>c.id!==id);
+  renderCart();
+  renderProducts();
+}
+
+function updateCartQty(id, val) {
+  const ci = cart.findIndex(c=>c.id===id);
+  if (ci>-1) { cart[ci].qty = Math.max(1,parseInt(val)||1); renderCart(); }
+}
+
+function clearCart() {
+  cart = [];
+  renderCart();
+  renderProducts();
+}
+
+function renderCart() {
+  const div = document.getElementById('cart-content');
+  const sumBox = document.getElementById('summary-box');
+  const btnWA = document.getElementById('btn-wa');
+
+  if (cart.length === 0) {
+    div.innerHTML = '<div class="cart-empty">Agregá productos desde el catálogo</div>';
+    sumBox.style.display = 'none';
+    btnWA.disabled = true;
+    return;
+  }
+
+  let subtotalNet = 0, totalIva = 0;
+  let rows = '';
+  cart.forEach(p => {
+    const lineNet = p.price * p.qty;
+    const lineIva = lineNet * p.iva;
+    subtotalNet += lineNet;
+    totalIva += lineIva;
+    rows += `<tr>
+      <td><div class="cart-model">${p.model}</div><div class="cart-desc" title="${p.desc}">${p.desc}</div></td>
+      <td style="text-align:center"><div style="display:flex;align-items:center;gap:3px;justify-content:center">
+        <button class="qty-btn" onclick="updateCartQty(${p.id},${p.qty-1})">−</button>
+        <input class="qty-inp" value="${p.qty}" onchange="updateCartQty(${p.id},this.value)" style="width:36px"/>
+        <button class="qty-btn" onclick="updateCartQty(${p.id},${p.qty+1})">+</button>
+      </div></td>
+      <td class="cart-price" style="text-align:right">${fmtUSD(lineNet)}</td>
+      <td><button class="btn-remove" onclick="removeFromCart(${p.id})">✕</button></td>
+    </tr>`;
+  });
+
+  const totalConIva = subtotalNet + totalIva;
+  const volDiscPct  = getDiscount(totalConIva);
+  const volDiscAmt  = totalConIva * volDiscPct / 100;
+
+  // Payment method adjustments
+  const { totalDeduction, usdBonus, isValid, label: payLabel, parts } = getPayInfo();
+  const netDiscPct = volDiscPct - totalDeduction + (usdBonus ? 1 : 0);
+  const netDiscAmt = totalConIva * netDiscPct / 100;
+  const finalTotalCorrected = totalConIva - netDiscAmt;
+
+  syncAmounts();
+
+  div.innerHTML = `<table class="cart-table">
+    <thead><tr><th>Producto</th><th style="text-align:center">Cant.</th><th style="text-align:right">Subtotal</th><th></th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+
+  document.getElementById('s-subtotal').textContent   = fmtUSD(subtotalNet);
+  document.getElementById('s-iva').textContent        = fmtUSD(totalIva);
+  document.getElementById('s-total-iva').textContent  = fmtUSD(totalConIva);
+  document.getElementById('s-desc').textContent       = `−${fmtUSD(volDiscAmt)} (${volDiscPct.toFixed(2)}%)`;
+  document.getElementById('s-final').textContent      = fmtUSD(finalTotalCorrected);
+  document.getElementById('disc-bar').style.width     = (Math.max(0, Math.min(netDiscPct,10))/10*100)+'%';
+  document.getElementById('disc-label').textContent   = netDiscPct > 0
+    ? `Descuento neto: ${netDiscPct.toFixed(2)}%`
+    : netDiscPct < 0
+      ? `Costo financiero neto: +${Math.abs(netDiscPct).toFixed(2)}%`
+      : 'Sin descuento neto';
+
+  // Deduction row
+  const payRow = document.getElementById('s-pay-row');
+  const usdRow = document.getElementById('s-usd-row');
+  if (totalDeduction > 0) {
+    const dedDetail = parts.filter(p => p.ded > 0)
+      .map(p => `${p.pm.label} ${p.pct.toFixed(0)}%: ${p.ded.toFixed(2)}%`).join(' · ');
+    document.getElementById('s-pay-label').textContent = `Deducción pago (${dedDetail})`;
+    document.getElementById('s-pay-val').textContent   = `+${fmtUSD(totalConIva * totalDeduction / 100)} (${totalDeduction.toFixed(2)}%)`;
+    payRow.style.display = 'flex';
+  } else { payRow.style.display = 'none'; }
+
+  if (usdBonus) {
+    document.getElementById('s-usd-val').textContent = `−${fmtUSD(totalConIva * 0.01)} (1.00%)`;
+    usdRow.style.display = 'flex';
+  } else { usdRow.style.display = 'none'; }
+
+  // Info box
+  const info = document.getElementById('pay-info-box');
+  if (!isValid && !isUsdMode) {
+    info.className = 'pay-info-box show';
+    const tot = Object.values(payMix).filter(m=>m.active).reduce((s,m)=>s+m.pct,0);
+    info.innerHTML = `⚠️ Los porcentajes asignados suman <strong>${tot.toFixed(1)}%</strong>. Deben sumar exactamente <strong>100%</strong> para poder enviar el pedido.`;
+  } else if (netDiscPct < 0) {
+    info.className = 'pay-info-box show';
+    info.innerHTML = `⚠️ La deducción por forma de pago (<strong>${totalDeduction.toFixed(2)}%</strong>) supera el descuento por volumen (<strong>${volDiscPct.toFixed(2)}%</strong>). El costo financiero neto de <strong>${Math.abs(netDiscPct).toFixed(2)}%</strong> se traslada al cliente.`;
+  } else if (totalDeduction > 0) {
+    info.className = 'pay-info-box show';
+    info.innerHTML = `⚠️ Descuento por volumen: <strong>${volDiscPct.toFixed(2)}%</strong> · Deducción ponderada: <strong>${totalDeduction.toFixed(2)}%</strong> → descuento neto: <strong>${netDiscPct.toFixed(2)}%</strong>.`;
+  } else if (usdBonus) {
+    info.className = 'pay-info-box show';
+    info.innerHTML = `💵 Pago en USD: descuento por volumen <strong>${volDiscPct.toFixed(2)}%</strong> + 1.00% bonus = descuento neto <strong>${netDiscPct.toFixed(2)}%</strong>.`;
+  } else {
+    info.className = 'pay-info-box';
+  }
+
+  sumBox.style.display = 'block';
+  btnWA.disabled = !isValid && !isUsdMode;
+}
+
+// ── WHATSAPP ──
+function enviarWA() {
+  const nombre  = document.getElementById('cl-nombre').value.trim();
+  const empresa = document.getElementById('cl-empresa').value.trim();
+  const tel     = document.getElementById('cl-tel').value.trim();
+  const dir     = document.getElementById('cl-dir').value.trim();
+
+  if (!nombre) { alert('Por favor ingresá tu nombre.'); document.getElementById('cl-nombre').focus(); return; }
+  if (cart.length===0) { alert('El pedido está vacío.'); return; }
+
+  const { totalDeduction, usdBonus, isValid, label: payLabel, parts } = getPayInfo();
+  if (!isValid && !isUsdMode) { alert('Los porcentajes de forma de pago deben sumar 100% antes de enviar.'); return; }
+
+  let subtotalNet=0, totalIva=0;
+  cart.forEach(p=>{ subtotalNet+=p.price*p.qty; totalIva+=p.price*p.qty*p.iva; });
+  const totalConIva = subtotalNet + totalIva;
+  const volDiscPct  = getDiscount(totalConIva);
+  const volDiscAmt  = totalConIva * volDiscPct / 100;
+  const netDiscPct  = volDiscPct - totalDeduction + (usdBonus ? 1 : 0);
+  const netDiscAmt  = totalConIva * netDiscPct / 100;
+  const finalTotal  = totalConIva - netDiscAmt;
+
+  const fecha = new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  let items = '';
+  cart.forEach(p=>{
+    const lineFull = p.price * p.qty * (1 + p.iva);
+    items += `• *${p.model}* x${p.qty} → ${fmtUSD(lineFull)}\n`;
+  });
+
+  let payDetail = '';
+  if (isUsdMode) {
+    payDetail = 'Transferencia / depósito USD (100%)';
+  } else {
+    payDetail = parts.map(p => {
+      const daysTxt = (p.key==='echeck-propio'||p.key==='echeck-terceros') ? ` · ${p.days} días` : '';
+      return `${p.pm.label} ${p.pct.toFixed(0)}%${daysTxt}`;
+    }).join(' + ');
+  }
+
+  const dedLine = totalDeduction > 0
+    ? `• Deducción ponderada (${totalDeduction.toFixed(2)}%): +${fmtUSD(totalConIva*totalDeduction/100)}\n`
+    : '';
+  const usdLine = usdBonus ? `• Bonus pago USD (1.00%): −${fmtUSD(totalConIva*0.01)}\n` : '';
+
+  const msg = `🛒 *NUEVO PEDIDO TEDLE*\n📅 ${fecha}\n\n` +
+    `👤 *Datos del cliente:*\n• Nombre: ${nombre}\n${empresa?`• Empresa: ${empresa}\n`:''}${tel?`• Teléfono: ${tel}\n`:''}${dir?`• Entrega: ${dir}\n`:''}\n` +
+    `💳 *Forma de pago:* ${payDetail}\n\n` +
+    `📦 *Detalle del pedido:*\n${items}\n` +
+    `💰 *Resumen:*\n• Subtotal s/IVA: ${fmtUSD(subtotalNet)}\n• IVA: ${fmtUSD(totalIva)}\n• Total c/IVA: ${fmtUSD(totalConIva)}\n• Desc. por volumen (${volDiscPct.toFixed(2)}%): −${fmtUSD(volDiscAmt)}\n${dedLine}${usdLine}• *TOTAL A PAGAR: ${fmtUSD(finalTotal)}* _(desc. neto ${netDiscPct.toFixed(2)}%)_`;
+
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ── ADMIN ──
+function openLogin() {
+  document.getElementById('login-modal').classList.add('show');
+  document.getElementById('login-pw').value='';
+  document.getElementById('login-error').style.display='none';
+  setTimeout(()=>document.getElementById('login-pw').focus(),100);
+}
+function closeLogin() { document.getElementById('login-modal').classList.remove('show'); }
+function checkLogin() {
+  if (document.getElementById('login-pw').value === ADMIN_PASS) {
+    closeLogin();
+    openAdmin();
+  } else {
+    document.getElementById('login-error').style.display='block';
+  }
+}
+function openAdmin() {
+  renderAdmin();
+  document.getElementById('admin-panel').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closeAdmin() {
+  document.getElementById('admin-panel').style.display='none';
+  document.body.style.overflow='';
+}
+
+function renderAdmin() {
+  const tbody = document.getElementById('admin-tbody');
+  tbody.innerHTML = '';
+  products.forEach((p,i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input class="admin-inp" value="${(p.model||'').replace(/"/g,'&quot;')}" onchange="products[${i}].model=this.value"/></td>
+      <td><input class="admin-inp" value="${(p.desc||'').replace(/"/g,'&quot;').substring(0,60)}" onchange="products[${i}].desc=this.value" style="width:100%"/></td>
+      <td><input class="admin-inp" value="${(p.cat||'').replace(/"/g,'&quot;')}" onchange="products[${i}].cat=this.value"/></td>
+      <td><input class="admin-inp" type="number" step="0.01" value="${p.price||''}" onchange="products[${i}].price=parseFloat(this.value)||null"/></td>
+      <td><input class="admin-inp" type="number" step="0.001" value="${p.iva}" onchange="products[${i}].iva=parseFloat(this.value)||0.21"/></td>
+      <td><select class="admin-inp" onchange="products[${i}].avail=this.value">
+        <option ${p.avail==='Disponible'?'selected':''}>Disponible</option>
+        <option ${p.avail==='Sin fecha'?'selected':''}>Sin fecha</option>
+        <option ${p.avail===''?'selected':''}>—</option>
+      </select></td>
+      <td><button class="btn-del" onclick="deleteProduct(${i})">🗑</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function addNewProduct() {
+  products.push({id:Date.now(),model:'NUEVO',desc:'Descripción del producto',price:null,iva:0.21,avail:'Disponible',cat:'Nueva categoría'});
+  renderAdmin();
+  document.getElementById('admin-tbody').lastElementChild.scrollIntoView({behavior:'smooth'});
+}
+
+function deleteProduct(i) {
+  if (!confirm('¿Eliminar este producto?')) return;
+  products.splice(i,1);
+  renderAdmin();
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(products,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'TEDLE_precios.json';
+  a.click();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error();
+      products = data;
+      renderAdmin();
+      alert(`✅ Importados ${data.length} productos. Hacé clic en "Guardar cambios" para confirmar.`);
+    } catch { alert('❌ Archivo JSON inválido.'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ── INIT ──
+populateCatFilter();
+filterProducts();
+</script>
+</body>
+</html>
