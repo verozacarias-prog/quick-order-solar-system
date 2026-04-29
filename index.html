@@ -156,27 +156,33 @@ table.admin-table tr:hover{background:var(--b50)}
 .pay-usd-opt:hover{border-color:var(--b400);background:var(--b50)}
 .pay-usd-opt.selected{border-color:var(--b700);background:var(--b50);box-shadow:0 0 0 3px rgba(0,82,184,.1)}
 .pay-usd-opt input[type=checkbox]{margin-top:3px;accent-color:var(--b700);flex-shrink:0;width:15px;height:15px}
-.pay-mix-hint{font-size:.72rem;color:var(--s500);margin-bottom:.4rem}
-.pay-mix-row{border:2px solid var(--s200);border-radius:10px;padding:.65rem .85rem;transition:border-color .15s,background .15s;background:var(--w);margin-bottom:.45rem}
-.pay-mix-row.active{border-color:var(--b500);background:var(--b50)}
-.pay-mix-row.disabled{opacity:.45;pointer-events:none}
-.pay-mix-header{display:flex;align-items:flex-start;gap:.6rem;cursor:pointer}
-.pay-mix-header input[type=checkbox]{margin-top:3px;accent-color:var(--b700);flex-shrink:0;width:15px;height:15px}
-.pay-opt-body{flex:1}
-.pay-opt-name{font-size:.85rem;font-weight:600;color:var(--s900)}
-.pay-opt-detail{font-size:.73rem;color:var(--s500);margin-top:2px;line-height:1.35}
-.pay-opt-badge{display:inline-block;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:4px;margin-top:4px}
+/* ── FORMA DE PAGO: sección por tipo ── */
+.pay-mix-hint{font-size:.72rem;color:var(--s500);margin-bottom:.5rem}
+.pay-type-section{border:1.5px solid var(--s200);border-radius:10px;padding:.6rem .75rem;margin-bottom:.4rem;background:var(--w);transition:border-color .15s,background .15s}
+.pay-type-section.active{border-color:var(--b400);background:var(--b50)}
+.pay-type-header{display:flex;align-items:center;gap:.55rem}
+.pay-type-header input[type=checkbox]{accent-color:var(--b700);flex-shrink:0;width:15px;height:15px;cursor:pointer}
+.pay-type-info{flex:1;display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .6rem}
+.pay-opt-name{font-size:.83rem;font-weight:600;color:var(--s900)}
+.pay-opt-badge{display:inline-block;font-size:.64rem;font-weight:700;padding:1px 6px;border-radius:4px}
 .badge-free{background:#dcfce7;color:#166534}
 .badge-cost{background:#fef3c7;color:#92400e}
 .badge-usd{background:var(--b100);color:var(--b800)}
-.pay-mix-inputs{margin-top:.55rem;padding-top:.5rem;border-top:1px solid var(--b100);display:flex;flex-wrap:wrap;gap:.4rem .7rem;align-items:center}
-.pay-mix-inp-group{display:flex;align-items:center;gap:.3rem}
-.pay-mix-inp-group label{font-size:.72rem;color:var(--s500);white-space:nowrap}
-.pay-mix-inp{width:80px;padding:.3rem .45rem;border:1.5px solid var(--s200);border-radius:7px;font-family:'DM Mono',monospace;font-size:.82rem;text-align:right;background:var(--s100)}
+/* Instancias compactas */
+.pay-instance-list{margin-top:.5rem;padding-top:.45rem;border-top:1px solid var(--b100);display:flex;flex-direction:column;gap:.3rem}
+.pay-instance-row{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .5rem}
+.pay-inst-num{font-size:.68rem;font-weight:700;color:var(--b600);min-width:1.4rem;text-align:right}
+.pay-mix-inp-group{display:flex;align-items:center;gap:.25rem}
+.pay-mix-inp-group label{font-size:.68rem;color:var(--s500);white-space:nowrap}
+.pay-mix-inp{width:58px;padding:.28rem .35rem;border:1.5px solid var(--s200);border-radius:6px;font-family:'DM Mono',monospace;font-size:.78rem;text-align:right;background:var(--s100)}
 .pay-mix-inp:focus{outline:none;border-color:var(--b600);background:var(--w)}
-.pay-mix-inp.wide{width:100px}
-.pay-days-inp{width:62px;padding:.3rem .45rem;border:1.5px solid var(--s200);border-radius:7px;font-family:'DM Mono',monospace;font-size:.82rem;text-align:center;background:var(--s100)}
+.pay-mix-inp.wide{width:80px}
+.pay-days-inp{width:46px;padding:.28rem .3rem;border:1.5px solid var(--s200);border-radius:6px;font-family:'DM Mono',monospace;font-size:.78rem;text-align:center;background:var(--s100)}
 .pay-days-inp:focus{outline:none;border-color:var(--b600);background:var(--w)}
+.pay-remove-btn{flex-shrink:0;background:none;border:none;cursor:pointer;font-size:1rem;color:var(--s300);line-height:1;padding:0 .1rem;transition:color .15s}
+.pay-remove-btn:hover{color:#ef4444}
+.pay-add-instance-btn{margin-top:.35rem;font-size:.7rem;padding:.22rem .55rem;border:1.5px dashed var(--s300);border-radius:6px;background:none;cursor:pointer;color:var(--s500);font-family:inherit;transition:all .15s;display:block}
+.pay-add-instance-btn:hover{border-color:var(--b500);color:var(--b700);background:var(--b50)}
 .pay-alloc{margin-top:.75rem;padding:.55rem .75rem;background:var(--s50,#f8fafc);border:1px solid var(--s200);border-radius:8px}
 .pay-alloc-bar-bg{height:7px;background:var(--s200);border-radius:4px;overflow:hidden;margin-bottom:.35rem}
 .pay-alloc-bar-fill{height:100%;border-radius:4px;transition:width .2s,background .2s}
@@ -304,107 +310,10 @@ table.admin-table tr:hover{background:var(--b50)}
 
         <!-- Métodos combinables -->
         <div id="pay-mix-section">
-          <div class="pay-mix-hint">Seleccioná uno o más métodos. Los porcentajes deben sumar 100%.</div>
+          <div class="pay-mix-hint">Seleccioná uno o más métodos. Podés agregar varias instancias del mismo cheque. Los porcentajes deben sumar 100%.</div>
 
-          <!-- Transferencia ARS -->
-          <div class="pay-mix-row active" id="pmr-trans-ars">
-            <div class="pay-mix-header">
-              <input type="checkbox" id="pmcb-trans-ars" checked onchange="togglePayMethod('trans-ars', this.checked)"/>
-              <div class="pay-opt-body">
-                <div class="pay-opt-name">🏦 Transferencia bancaria</div>
-                <div class="pay-opt-detail">Pago en pesos (ARS)</div>
-                <span class="pay-opt-badge badge-free">Sin deducción</span>
-              </div>
-            </div>
-            <div class="pay-mix-inputs" id="pmi-trans-ars">
-              <div class="pay-mix-inp-group">
-                <label>%</label>
-                <input class="pay-mix-inp" type="number" id="pm-pct-trans-ars" min="0" max="100" step="1" value="100" oninput="updatePayPct('trans-ars',this.value)"/>
-              </div>
-              <div class="pay-mix-inp-group">
-                <label>USD</label>
-                <input class="pay-mix-inp wide" type="number" id="pm-amt-trans-ars" min="0" step="0.01" placeholder="—" oninput="updatePayAmt('trans-ars',this.value)"/>
-              </div>
-            </div>
-          </div>
-
-          <!-- e-check propio -->
-          <div class="pay-mix-row" id="pmr-echeck-propio">
-            <div class="pay-mix-header">
-              <input type="checkbox" id="pmcb-echeck-propio" onchange="togglePayMethod('echeck-propio', this.checked)"/>
-              <div class="pay-opt-body">
-                <div class="pay-opt-name">📄 e-check propio</div>
-                <div class="pay-opt-detail">Echeq de cuenta propia · hasta 60 días</div>
-                <span class="pay-opt-badge badge-cost">Ded. 0.70% base + 0.08%/día</span>
-              </div>
-            </div>
-            <div class="pay-mix-inputs" id="pmi-echeck-propio" style="display:none">
-              <div class="pay-mix-inp-group">
-                <label>%</label>
-                <input class="pay-mix-inp" type="number" id="pm-pct-echeck-propio" min="0" max="100" step="1" value="0" oninput="updatePayPct('echeck-propio',this.value)"/>
-              </div>
-              <div class="pay-mix-inp-group">
-                <label>USD</label>
-                <input class="pay-mix-inp wide" type="number" id="pm-amt-echeck-propio" min="0" step="0.01" placeholder="—" oninput="updatePayAmt('echeck-propio',this.value)"/>
-              </div>
-              <div class="pay-mix-inp-group">
-                <label>Días</label>
-                <input class="pay-days-inp" type="number" id="pm-days-echeck-propio" min="1" max="60" value="30" oninput="updatePayDays('echeck-propio',this.value)"/>
-              </div>
-            </div>
-          </div>
-
-          <!-- Cheque físico -->
-          <div class="pay-mix-row" id="pmr-cheque-fisico">
-            <div class="pay-mix-header">
-              <input type="checkbox" id="pmcb-cheque-fisico" onchange="togglePayMethod('cheque-fisico', this.checked)"/>
-              <div class="pay-opt-body">
-                <div class="pay-opt-name">📋 Cheque propio físico</div>
-                <div class="pay-opt-detail">Cheque físico de cuenta propia</div>
-                <span class="pay-opt-badge badge-cost">Ded. 1.40% base + 0.08%/día</span>
-              </div>
-            </div>
-            <div class="pay-mix-inputs" id="pmi-cheque-fisico" style="display:none">
-              <div class="pay-mix-inp-group">
-                <label>%</label>
-                <input class="pay-mix-inp" type="number" id="pm-pct-cheque-fisico" min="0" max="100" step="1" value="0" oninput="updatePayPct('cheque-fisico',this.value)"/>
-              </div>
-              <div class="pay-mix-inp-group">
-                <label>USD</label>
-                <input class="pay-mix-inp wide" type="number" id="pm-amt-cheque-fisico" min="0" step="0.01" placeholder="—" oninput="updatePayAmt('cheque-fisico',this.value)"/>
-              </div>
-              <div class="pay-mix-inp-group">
-                <label>Días</label>
-                <input class="pay-days-inp" type="number" id="pm-days-cheque-fisico" min="1" max="60" value="30" oninput="updatePayDays('cheque-fisico',this.value)"/>
-              </div>
-            </div>
-          </div>
-
-          <!-- e-check de terceros -->
-          <div class="pay-mix-row" id="pmr-echeck-terceros">
-            <div class="pay-mix-header">
-              <input type="checkbox" id="pmcb-echeck-terceros" onchange="togglePayMethod('echeck-terceros', this.checked)"/>
-              <div class="pay-opt-body">
-                <div class="pay-opt-name">📄 e-check de terceros</div>
-                <div class="pay-opt-detail">Echeq endosado de terceros · hasta 60 días</div>
-                <span class="pay-opt-badge badge-cost">Ded. 1.90% base + 0.08%/día</span>
-              </div>
-            </div>
-            <div class="pay-mix-inputs" id="pmi-echeck-terceros" style="display:none">
-              <div class="pay-mix-inp-group">
-                <label>%</label>
-                <input class="pay-mix-inp" type="number" id="pm-pct-echeck-terceros" min="0" max="100" step="1" value="0" oninput="updatePayPct('echeck-terceros',this.value)"/>
-              </div>
-              <div class="pay-mix-inp-group">
-                <label>USD</label>
-                <input class="pay-mix-inp wide" type="number" id="pm-amt-echeck-terceros" min="0" step="0.01" placeholder="—" oninput="updatePayAmt('echeck-terceros',this.value)"/>
-              </div>
-              <div class="pay-mix-inp-group">
-                <label>Días</label>
-                <input class="pay-days-inp" type="number" id="pm-days-echeck-terceros" min="1" max="60" value="30" oninput="updatePayDays('echeck-terceros',this.value)"/>
-              </div>
-            </div>
-          </div>
+          <!-- Secciones por tipo generadas por renderPayMix() -->
+          <div id="pay-mix-entries"></div>
 
           <!-- Barra de asignación -->
           <div class="pay-alloc" id="pay-alloc">
@@ -564,20 +473,18 @@ function getDiscount(total) {
 
 // ── PAYMENT METHOD ──
 const PAY_METHODS = {
-  'trans-ars':      { label:'Transferencia bancaria (ARS)',   baseDeduction:0,    perDay:0,    usdBonus:false },
-  'echeck-propio':  { label:'e-check propio',                 baseDeduction:0.70, perDay:0.08, usdBonus:false },
-  'cheque-fisico':  { label:'Cheque propio físico',           baseDeduction:1.40, perDay:0.08, usdBonus:false },
-  'echeck-terceros':{ label:'e-check de terceros',            baseDeduction:1.90, perDay:0.08, usdBonus:false },
-  'usd-trans':      { label:'Transferencia / depósito USD',   baseDeduction:0,    perDay:0,    usdBonus:true  },
+  'trans-ars':      { label:'Transferencia bancaria (ARS)', icon:'🏦', name:'Transferencia bancaria', detail:'Pago en pesos (ARS)',                        badge:'Sin deducción',              badgeCls:'badge-free', baseDeduction:0,    perDay:0,    usdBonus:false },
+  'echeck-propio':  { label:'e-check propio',               icon:'📄', name:'e-check propio',         detail:'Echeq de cuenta propia',                      badge:'Ded. 0.70% base + 0.08%/día', badgeCls:'badge-cost', baseDeduction:0.70, perDay:0.08, usdBonus:false },
+  'cheque-fisico':  { label:'Cheque propio físico',         icon:'📋', name:'Cheque propio físico',   detail:'Cheque físico de cuenta propia',               badge:'Ded. 1.40% base + 0.08%/día', badgeCls:'badge-cost', baseDeduction:1.40, perDay:0.08, usdBonus:false },
+  'echeck-terceros':{ label:'e-check de terceros',          icon:'📄', name:'e-check de terceros',    detail:'Echeq endosado de terceros',                   badge:'Ded. 1.90% base + 0.08%/día', badgeCls:'badge-cost', baseDeduction:1.90, perDay:0.08, usdBonus:false },
+  'usd-trans':      { label:'Transferencia / depósito USD', icon:'💵', name:'USD',                    detail:'Pago 100% en dólares',                         badge:'+1.00% descuento adicional',  badgeCls:'badge-usd',  baseDeduction:0,    perDay:0,    usdBonus:true  },
 };
 
 let isUsdMode = false;
-const payMix = {
-  'trans-ars':      { active: true,  pct: 100, days: 0  },
-  'echeck-propio':  { active: false, pct: 0,   days: 30 },
-  'cheque-fisico':  { active: false, pct: 0,   days: 30 },
-  'echeck-terceros':{ active: false, pct: 0,   days: 30 },
-};
+let _pmId = 0;
+let payMix = [
+  { id: _pmId++, type: 'trans-ars', pct: 100, days: 0 }
+];
 
 function toggleUsdMode(on) {
   isUsdMode = on;
@@ -586,42 +493,147 @@ function toggleUsdMode(on) {
   renderCart();
 }
 
-function togglePayMethod(key, newState) {
-  payMix[key].active = newState;
-  document.getElementById('pmr-' + key).classList.toggle('active', newState);
-  document.getElementById('pmi-' + key).style.display = newState ? 'flex' : 'none';
-  if (!newState) {
-    payMix[key].pct = 0;
-    document.getElementById('pm-pct-' + key).value = 0;
-    document.getElementById('pm-amt-' + key).value = '';
+// ── PAY MIX: AGREGAR / QUITAR ENTRADAS ──
+const PAY_TYPE_ORDER = ['trans-ars', 'echeck-propio', 'cheque-fisico', 'echeck-terceros'];
+
+function togglePayType(type, checked) {
+  if (checked) {
+    payMix.push({ id: _pmId++, type, pct: 0, days: 30 });
+  } else {
+    payMix = payMix.filter(m => m.type !== type);
+    // Si quedó vacío, reactivar trans-ars con 0%
+    if (payMix.length === 0) payMix.push({ id: _pmId++, type: 'trans-ars', pct: 0, days: 0 });
+  }
+  renderPayMix();
+  updateAllocBar();
+  renderCart();
+}
+
+function addPayEntry(type) {
+  payMix.push({ id: _pmId++, type, pct: 0, days: 30 });
+  renderPayMix();
+  updateAllocBar();
+  renderCart();
+}
+
+function removePayEntry(id) {
+  const entry = payMix.find(m => m.id === id);
+  if (!entry) return;
+  const siblings = payMix.filter(m => m.type === entry.type);
+  if (siblings.length <= 1) return; // no quitar la última instancia del tipo
+  payMix = payMix.filter(m => m.id !== id);
+  renderPayMix();
+  updateAllocBar();
+  renderCart();
+}
+
+function renderPayMix() {
+  const container = document.getElementById('pay-mix-entries');
+  if (!container) return;
+  container.innerHTML = '';
+
+  PAY_TYPE_ORDER.forEach(type => {
+    const pm = PAY_METHODS[type];
+    const instances = payMix.filter(m => m.type === type);
+    const isActive = instances.length > 0;
+    const isMulti = pm.perDay > 0; // cheques pueden repetirse
+
+    const section = document.createElement('div');
+    section.className = 'pay-type-section' + (isActive ? ' active' : '');
+    section.id = 'pts-' + type;
+
+    // ── Header: checkbox + nombre + badge ──
+    section.innerHTML = `
+      <div class="pay-type-header">
+        <input type="checkbox" id="ptcb-${type}" ${isActive ? 'checked' : ''}
+               onchange="togglePayType('${type}', this.checked)"/>
+        <div class="pay-type-info">
+          <span class="pay-opt-name">${pm.icon} ${pm.name}</span>
+          <span class="pay-opt-badge ${pm.badgeCls}">${pm.badge}</span>
+        </div>
+      </div>`;
+
+    // ── Instancias (solo si activo) ──
+    if (isActive) {
+      const list = document.createElement('div');
+      list.className = 'pay-instance-list';
+
+      instances.forEach((m, idx) => {
+        const hasDays = pm.perDay > 0;
+        const canRemove = instances.length > 1;
+        const row = document.createElement('div');
+        row.className = 'pay-instance-row';
+        row.id = 'pir-' + m.id;
+        row.innerHTML =
+          (instances.length > 1 ? `<span class="pay-inst-num">#${idx + 1}</span>` : '') +
+          `<div class="pay-mix-inp-group"><label>%</label>
+             <input class="pay-mix-inp" type="number" id="pm-pct-${m.id}" min="0" max="100" step="1"
+                    value="${m.pct.toFixed(1)}" oninput="updatePayPct(${m.id},this.value)"/>
+           </div>
+           <div class="pay-mix-inp-group"><label>USD</label>
+             <input class="pay-mix-inp wide" type="number" id="pm-amt-${m.id}" min="0" step="0.01"
+                    placeholder="—" oninput="updatePayAmt(${m.id},this.value)"/>
+           </div>` +
+          (hasDays
+            ? `<div class="pay-mix-inp-group"><label>Días</label>
+                 <input class="pay-days-inp" type="number" id="pm-days-${m.id}" min="1" max="360"
+                        value="${m.days}" oninput="updatePayDays(${m.id},this.value)"/>
+               </div>`
+            : '') +
+          (canRemove
+            ? `<button class="pay-remove-btn" onclick="removePayEntry(${m.id})" title="Quitar">×</button>`
+            : '');
+        list.appendChild(row);
+      });
+
+      section.appendChild(list);
+
+      // Botón "+ agregar otra instancia" (solo para tipos multi)
+      if (isMulti) {
+        const addBtn = document.createElement('button');
+        addBtn.className = 'pay-add-instance-btn';
+        addBtn.textContent = '+ Agregar otro';
+        addBtn.onclick = () => addPayEntry(type);
+        section.appendChild(addBtn);
+      }
+    }
+
+    container.appendChild(section);
+  });
+
+  syncAmounts();
+}
+
+function updatePayPct(id, val) {
+  const m = payMix.find(x => x.id === id);
+  if (!m) return;
+  m.pct = Math.max(0, Math.min(100, parseFloat(val) || 0));
+  const total = getCartTotal();
+  if (total > 0) {
+    const el = document.getElementById('pm-amt-' + id);
+    if (el) el.value = (total * m.pct / 100).toFixed(2);
   }
   updateAllocBar();
   renderCart();
 }
 
-function updatePayPct(key, val) {
-  let pct = Math.max(0, Math.min(100, parseFloat(val) || 0));
-  payMix[key].pct = pct;
-  // Sync amount
-  const total = getCartTotal();
-  if (total > 0) document.getElementById('pm-amt-' + key).value = (total * pct / 100).toFixed(2);
-  updateAllocBar();
-  renderCart();
-}
-
-function updatePayAmt(key, val) {
+function updatePayAmt(id, val) {
   const total = getCartTotal();
   if (total <= 0) return;
+  const m = payMix.find(x => x.id === id);
+  if (!m) return;
   const amt = Math.max(0, parseFloat(val) || 0);
-  const pct = Math.min(100, amt / total * 100);
-  payMix[key].pct = pct;
-  document.getElementById('pm-pct-' + key).value = pct.toFixed(1);
+  m.pct = Math.min(100, amt / total * 100);
+  const el = document.getElementById('pm-pct-' + id);
+  if (el) el.value = m.pct.toFixed(1);
   updateAllocBar();
   renderCart();
 }
 
-function updatePayDays(key, val) {
-  payMix[key].days = Math.min(60, Math.max(1, parseInt(val) || 30));
+function updatePayDays(id, val) {
+  const m = payMix.find(x => x.id === id);
+  if (!m) return;
+  m.days = Math.max(1, parseInt(val) || 30);
   renderCart();
 }
 
@@ -632,7 +644,7 @@ function getCartTotal() {
 }
 
 function updateAllocBar() {
-  const total = Object.values(payMix).filter(m => m.active).reduce((s, m) => s + m.pct, 0);
+  const total = payMix.reduce((s, m) => s + m.pct, 0);
   const pct = Math.min(total, 100);
   const fill = document.getElementById('pay-alloc-fill');
   const lbl  = document.getElementById('pay-alloc-label');
@@ -655,10 +667,9 @@ function updateAllocBar() {
 function syncAmounts() {
   const total = getCartTotal();
   if (total <= 0) return;
-  Object.keys(payMix).forEach(key => {
-    if (payMix[key].active) {
-      document.getElementById('pm-amt-' + key).value = (total * payMix[key].pct / 100).toFixed(2);
-    }
+  payMix.forEach(m => {
+    const el = document.getElementById('pm-amt-' + m.id);
+    if (el) el.value = (total * m.pct / 100).toFixed(2);
   });
 }
 
@@ -666,17 +677,17 @@ function getPayInfo() {
   if (isUsdMode) {
     return { totalDeduction: 0, usdBonus: true, isValid: true, label: 'Transferencia / depósito USD', parts: [] };
   }
-  const activeParts = Object.entries(payMix)
-    .filter(([, m]) => m.active && m.pct > 0)
-    .map(([key, m]) => {
-      const pm = PAY_METHODS[key];
-      const days = Math.min(60, Math.max(1, m.days || 0));
+  const activeParts = payMix
+    .filter(m => m.pct > 0)
+    .map(m => {
+      const pm = PAY_METHODS[m.type];
+      const days = Math.max(1, m.days || 1);
       const ded = pm.baseDeduction + days * pm.perDay;
-      return { key, pm, pct: m.pct, days, ded };
+      return { id: m.id, type: m.type, pm, pct: m.pct, days, ded };
     });
-  const totalPct = activeParts.reduce((s, p) => s + p.pct, 0);
+  const totalPct = payMix.reduce((s, m) => s + m.pct, 0);
   const totalDeduction = activeParts.reduce((s, p) => s + (p.pct / 100) * p.ded, 0);
-  const isValid = Math.abs(totalPct - 100) < 0.1 && activeParts.length > 0;
+  const isValid = Math.abs(totalPct - 100) < 0.1 && payMix.length > 0;
   const label = activeParts.map(p => `${p.pm.label} (${p.pct.toFixed(0)}%)`).join(' + ');
   return { totalDeduction, usdBonus: false, isValid, label, parts: activeParts };
 }
@@ -934,7 +945,7 @@ function renderCart() {
   const info = document.getElementById('pay-info-box');
   if (!isValid && !isUsdMode) {
     info.className = 'pay-info-box show';
-    const tot = Object.values(payMix).filter(m=>m.active).reduce((s,m)=>s+m.pct,0);
+    const tot = payMix.reduce((s,m)=>s+m.pct,0);
     info.innerHTML = `⚠️ Los porcentajes asignados suman <strong>${tot.toFixed(1)}%</strong>. Deben sumar exactamente <strong>100%</strong> para poder enviar el pedido.`;
   } else if (netDiscPct < 0) {
     info.className = 'pay-info-box show';
@@ -988,7 +999,7 @@ function enviarWA() {
     payDetail = 'Transferencia / depósito USD (100%)';
   } else {
     payDetail = parts.map(p => {
-      const daysTxt = (p.key==='echeck-propio'||p.key==='echeck-terceros') ? ` · ${p.days} días` : '';
+      const daysTxt = p.pm.perDay > 0 ? ` · ${p.days} días` : '';
       return `${p.pm.label} ${p.pct.toFixed(0)}%${daysTxt}`;
     }).join(' + ');
   }
@@ -1094,6 +1105,8 @@ function importJSON(e) {
 // ── INIT ──
 populateCatFilter();
 filterProducts();
+renderPayMix();
+updateAllocBar();
 </script>
 </body>
 </html>
