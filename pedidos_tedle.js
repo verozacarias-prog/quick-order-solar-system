@@ -125,7 +125,7 @@ function renderPayMix() {
            </div>` +
           (hasDays
             ? `<div class="pay-mix-inp-group"><label>Días</label>
-                 <input class="pay-days-inp" type="number" id="pm-days-${m.id}" min="1" max="360"
+                 <input class="pay-days-inp" type="number" id="pm-days-${m.id}" min="1" max="60"
                         value="${m.days}" oninput="updatePayDays(${m.id},this.value)"/>
                </div>`
             : '') +
@@ -182,7 +182,7 @@ function updatePayAmt(id, val) {
 function updatePayDays(id, val) {
   const m = payMix.find(x => x.id === id);
   if (!m) return;
-  m.days = Math.max(1, parseInt(val) || 30);
+  m.days = Math.min(60, Math.max(1, parseInt(val) || 30));
   renderCart();
 }
 
