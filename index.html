@@ -125,30 +125,6 @@ table.cart-table th:nth-child(4),table.cart-table td:nth-child(4){width:26px}
 .btn-reset:hover{background:var(--s200)}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
 
-/* ADMIN PANEL */
-#admin-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;overflow-y:auto;padding:1.5rem}
-.admin-modal{background:var(--w);border-radius:16px;max-width:900px;margin:0 auto;box-shadow:var(--shadow-lg);overflow:hidden}
-.admin-hd{background:var(--b900);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between}
-.admin-hd h3{font-size:.95rem;font-weight:600}
-.btn-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.3rem;cursor:pointer;padding:0 4px;line-height:1}
-.btn-close:hover{color:#fff}
-.admin-body{padding:1.25rem}
-.admin-toolbar{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
-.btn-sm{padding:.4rem .8rem;border-radius:7px;border:none;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;transition:background .15s}
-.btn-add-prod{background:var(--b700);color:#fff}
-.btn-add-prod:hover{background:var(--b800)}
-.btn-save-all{background:var(--teal);color:#fff}
-.btn-save-all:hover{background:#00695c}
-.btn-export{background:var(--s200);color:var(--s700)}
-.btn-export:hover{background:var(--s300)}
-table.admin-table{width:100%;border-collapse:collapse;font-size:.8rem}
-table.admin-table th{background:var(--s100);padding:.5rem .6rem;text-align:left;font-size:.72rem;font-weight:600;color:var(--s500);border-bottom:1px solid var(--s200);white-space:nowrap}
-table.admin-table td{padding:.4rem .5rem;border-bottom:1px solid var(--s200);vertical-align:middle}
-table.admin-table tr:hover{background:var(--b50)}
-.admin-inp{width:100%;border:1.5px solid var(--s200);border-radius:6px;padding:.3rem .5rem;font-size:.78rem;font-family:inherit;background:var(--s100)}
-.admin-inp:focus{outline:none;border-color:var(--b600);background:var(--w)}
-.btn-del{background:none;border:none;color:var(--r);cursor:pointer;font-size:.85rem;padding:0}
-.btn-del:hover{color:#991b1b}
 
 /* PAYMENT METHOD */
 /* pay mix */
@@ -193,19 +169,6 @@ table.admin-table tr:hover{background:var(--b50)}
 .pay-info-box.show{display:block}
 .sum-row.deduction{color:#92400e}
 .sum-row.usd-bonus{color:var(--teal)}
-
-/* ADMIN TRIGGER */
-.admin-trigger{text-align:center;margin-top:1.5rem;padding:.5rem}
-.admin-link{font-size:.72rem;color:var(--s400);cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;text-underline-offset:2px}
-.admin-link:hover{color:var(--s600,var(--s700))}
-
-/* LOGIN MODAL */
-#login-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:center;justify-content:center}
-#login-modal.show{display:flex}
-.login-box{background:var(--w);border-radius:14px;padding:2rem;width:min(320px,90vw);box-shadow:var(--shadow-lg);text-align:center}
-.login-box h3{font-size:1rem;font-weight:700;margin-bottom:.3rem}
-.login-box p{font-size:.8rem;color:var(--s500);margin-bottom:1.1rem}
-.login-error{color:var(--r);font-size:.78rem;margin-top:.4rem;display:none}
 
 /* SECTION HEADERS */
 .section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--s500);padding:.35rem .8rem;background:var(--s100);border-bottom:1px solid var(--s200)}
@@ -369,58 +332,7 @@ table.admin-table tr:hover{background:var(--b50)}
     </p>
   </div>
 
-  <div class="admin-trigger">
-    <button class="admin-link" onclick="openLogin()">⚙️ Administración de precios</button>
-  </div>
-
 </main>
-
-<!-- LOGIN MODAL -->
-<div id="login-modal">
-  <div class="login-box">
-    <h3>🔐 Acceso Admin</h3>
-    <p>Ingresá la contraseña para editar la lista de precios</p>
-    <div class="fg"><input class="inp" id="login-pw" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')checkLogin()"/></div>
-    <div class="login-error" id="login-error">Contraseña incorrecta</div>
-    <button class="btn" style="margin-top:.8rem;background:var(--b700);color:#fff;width:100%" onclick="checkLogin()">Ingresar</button>
-    <button class="btn btn-reset" style="margin-top:.35rem" onclick="closeLogin()">Cancelar</button>
-  </div>
-</div>
-
-<!-- ADMIN PANEL -->
-<div id="admin-panel">
-  <div class="admin-modal">
-    <div class="admin-hd">
-      <h3>⚙️ Administración de lista de precios</h3>
-      <button class="btn-close" onclick="closeAdmin()">✕</button>
-    </div>
-    <div class="admin-body">
-      <div class="admin-toolbar">
-        <button class="btn-sm btn-add-prod" onclick="addNewProduct()">+ Agregar producto</button>
-        <button class="btn-sm btn-save-all" onclick="saveProducts()">💾 Guardar cambios</button>
-        <button class="btn-sm btn-export" onclick="exportJSON()">↓ Exportar JSON</button>
-        <button class="btn-sm btn-export" onclick="resetProducts()">↺ Restaurar originales</button>
-        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)"/>
-        <button class="btn-sm btn-export" onclick="document.getElementById('import-file').click()">↑ Importar JSON</button>
-      </div>
-      <p style="font-size:.75rem;color:var(--s500);margin-bottom:.75rem">Los cambios se guardan en el navegador (localStorage). Exportá el JSON para respaldo.</p>
-      <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--s200)">
-        <table class="admin-table">
-          <thead><tr>
-            <th style="width:130px">Modelo</th>
-            <th>Descripción</th>
-            <th style="width:100px">Categoría</th>
-            <th style="width:80px">Precio USD</th>
-            <th style="width:60px">IVA</th>
-            <th style="width:90px">Disponib.</th>
-            <th style="width:36px"></th>
-          </tr></thead>
-          <tbody id="admin-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script src="pedidos_tedle.js" defer></script>
 </body>

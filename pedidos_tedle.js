@@ -1,31 +1,12 @@
 // ── CONFIG ──
 const WA_NUMBER = '5491140289444';
-const ADMIN_PASS = 'tedle2026';
-const STORAGE_KEY = 'tedle_products_v2';
 const PAGE_SIZE = 25;
 
 // ── STATE ──
-let _defaultProducts = []; // copia del JSON original para poder restaurar
 let products = [];
 let cart = [];
 let currentPage = 1;
 let filtered = [];
-
-function saveProducts() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-  renderAdmin();
-  filterProducts();
-  alert('✅ Cambios guardados correctamente.');
-}
-
-function resetProducts() {
-  if (!confirm('¿Restaurar la lista original? Se perderán los cambios guardados.')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  products = [..._defaultProducts];
-  filterProducts();
-  renderAdmin();
-  alert('✅ Lista restaurada.');
-}
 
 // ── DISCOUNT CURVE ──
 const PUNTOS = [[0,0],[1999,0],[2000,2],[4000,4.22],[6500,7],[10000,8.11],[13000,9.05],[16000,10]];
@@ -586,89 +567,6 @@ function enviarWA() {
   window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// ── ADMIN ──
-function openLogin() {
-  document.getElementById('login-modal').classList.add('show');
-  document.getElementById('login-pw').value='';
-  document.getElementById('login-error').style.display='none';
-  setTimeout(()=>document.getElementById('login-pw').focus(),100);
-}
-function closeLogin() { document.getElementById('login-modal').classList.remove('show'); }
-function checkLogin() {
-  if (document.getElementById('login-pw').value === ADMIN_PASS) {
-    closeLogin();
-    openAdmin();
-  } else {
-    document.getElementById('login-error').style.display='block';
-  }
-}
-function openAdmin() {
-  renderAdmin();
-  document.getElementById('admin-panel').style.display='block';
-  document.body.style.overflow='hidden';
-}
-function closeAdmin() {
-  document.getElementById('admin-panel').style.display='none';
-  document.body.style.overflow='';
-}
-
-function renderAdmin() {
-  const tbody = document.getElementById('admin-tbody');
-  tbody.innerHTML = '';
-  products.forEach((p,i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input class="admin-inp" value="${(p.model||'').replace(/"/g,'&quot;')}" onchange="products[${i}].model=this.value"/></td>
-      <td><input class="admin-inp" value="${(p.desc||'').replace(/"/g,'&quot;').substring(0,60)}" onchange="products[${i}].desc=this.value" style="width:100%"/></td>
-      <td><input class="admin-inp" value="${(p.cat||'').replace(/"/g,'&quot;')}" onchange="products[${i}].cat=this.value"/></td>
-      <td><input class="admin-inp" type="number" step="0.01" value="${p.price||''}" onchange="products[${i}].price=parseFloat(this.value)||null"/></td>
-      <td><input class="admin-inp" type="number" step="0.001" value="${p.iva}" onchange="products[${i}].iva=parseFloat(this.value)||0.21"/></td>
-      <td><select class="admin-inp" onchange="products[${i}].avail=this.value">
-        <option ${p.avail==='Disponible'?'selected':''}>Disponible</option>
-        <option ${p.avail==='Sin fecha'?'selected':''}>Sin fecha</option>
-        <option ${p.avail===''?'selected':''}>—</option>
-      </select></td>
-      <td><button class="btn-del" onclick="deleteProduct(${i})">🗑</button></td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-function addNewProduct() {
-  products.push({id:Date.now(),model:'NUEVO',desc:'Descripción del producto',price:null,iva:0.21,avail:'Disponible',cat:'Nueva categoría'});
-  renderAdmin();
-  document.getElementById('admin-tbody').lastElementChild.scrollIntoView({behavior:'smooth'});
-}
-
-function deleteProduct(i) {
-  if (!confirm('¿Eliminar este producto?')) return;
-  products.splice(i,1);
-  renderAdmin();
-}
-
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(products,null,2)],{type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'TEDLE_precios.json';
-  a.click();
-}
-
-function importJSON(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const data = JSON.parse(ev.target.result);
-      if (!Array.isArray(data)) throw new Error();
-      products = data;
-      renderAdmin();
-      alert(`✅ Importados ${data.length} productos. Hacé clic en "Guardar cambios" para confirmar.`);
-    } catch { alert('❌ Archivo JSON inválido.'); }
-  };
-  reader.readAsText(file);
-  e.target.value='';
-}
 
 
 // ── INIT ──
@@ -678,15 +576,7 @@ fetch('productos.json')
     return r.json();
   })
   .then(data => {
-    const lista = data.productos ?? data; // soporta objeto nuevo {fecha,productos} o array legacy
-    _defaultProducts = lista;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      products = saved ? JSON.parse(saved) : lista;
-    } catch {
-      products = lista;
-    }
-    // Mostrar fecha de actualización
+    products = data.productos ?? data;
     if (data.fecha_actualizacion) {
       const el = document.getElementById('fecha-actualizacion');
       if (el) el.textContent = data.fecha_actualizacion;
