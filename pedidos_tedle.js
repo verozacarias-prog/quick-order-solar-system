@@ -127,6 +127,7 @@ function renderPayMix() {
             ? `<div class="pay-mix-inp-group"><label>Días</label>
                  <input class="pay-days-inp" type="number" id="pm-days-${m.id}" min="1" max="60"
                         value="${m.days}" oninput="updatePayDays(${m.id},this.value)"/>
+                 <span id="pm-days-err-${m.id}" style="display:none;font-size:.65rem;color:#ef4444;white-space:nowrap">máx. 60</span>
                </div>`
             : '') +
           (canRemove
@@ -182,7 +183,21 @@ function updatePayAmt(id, val) {
 function updatePayDays(id, val) {
   const m = payMix.find(x => x.id === id);
   if (!m) return;
-  m.days = Math.min(60, Math.max(1, parseInt(val) || 30));
+  const raw = parseInt(val) || 1;
+  const clamped = Math.min(60, Math.max(1, raw));
+  m.days = clamped;
+  const inp = document.getElementById('pm-days-' + id);
+  if (inp) {
+    inp.value = clamped;
+    const err = document.getElementById('pm-days-err-' + id);
+    if (raw > 60) {
+      inp.style.borderColor = '#ef4444';
+      if (err) { err.style.display = 'inline'; }
+    } else {
+      inp.style.borderColor = '';
+      if (err) { err.style.display = 'none'; }
+    }
+  }
   renderCart();
 }
 

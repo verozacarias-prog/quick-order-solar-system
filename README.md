@@ -53,7 +53,8 @@ Los métodos de cheque permiten múltiples instancias (ej: dos e-checks de terce
 deducción_total = Σ (pct_i / 100 × deducción_i)
 ```
 
-Si la deducción supera el descuento por volumen, la diferencia se traslada al cliente como costo financiero.
+- Los días de cualquier cheque tienen un máximo de **60 días**. Si se ingresa un valor mayor, el campo se corrige automáticamente a 60 y muestra un mensaje de error.
+- Si la deducción supera el descuento por volumen, la diferencia se traslada al cliente como costo financiero.
 
 ### Carrito y pedido
 - El resumen muestra subtotal s/IVA, IVA, descuento por volumen, deducción por pago y total final.
