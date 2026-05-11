@@ -618,7 +618,7 @@ function enviarWA() {
   } else {
     payDetail = parts.map(p => {
       const daysTxt = p.pm.perDay > 0 ? ` · ${p.days} días` : '';
-      const usdAmt = totalConIva * p.pct / 100;
+      const usdAmt = finalTotal * p.pct / 100;
       const arsTxt = bnaRate ? ` ($ ${Math.round(usdAmt * bnaRate).toLocaleString('es-AR')} ARS)` : '';
       return `${p.pm.label} ${p.pct.toFixed(0)}%${daysTxt}${arsTxt}`;
     }).join(' + ');
