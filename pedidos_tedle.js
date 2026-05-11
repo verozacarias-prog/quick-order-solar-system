@@ -7,6 +7,7 @@ let products = [];
 let cart = [];
 let currentPage = 1;
 let filtered = [];
+let bnaRate = null;
 
 // ── DISCOUNT CURVE ──
 const PUNTOS = [[0,0],[1999,0],[2000,2],[4000,4.22],[6500,7],[10000,8.11],[13000,9.05],[16000,10]];
@@ -40,6 +41,29 @@ function toggleUsdMode(on) {
   document.getElementById('pay-usd-opt').classList.toggle('selected', on);
   document.getElementById('pay-mix-section').style.display = on ? 'none' : '';
   renderCart();
+}
+
+// ── COTIZACIÓN BNA ──
+async function fetchBnaRate() {
+  const el = document.getElementById('bna-rate-display');
+  if (el) el.innerHTML = '<span class="bna-loading">⏳ Obteniendo cotización BNA…</span>';
+  try {
+    const r = await fetch('https://dolarapi.com/v1/dolares/oficial');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    bnaRate = parseFloat(d.venta);
+    if (el) el.innerHTML =
+      `<span class="bna-ok">💵 Dólar BNA vendedor: <strong>$ ${bnaRate.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span>` +
+      `&nbsp;<button class="bna-refresh-btn" onclick="fetchBnaRate()" title="Actualizar cotización">↻</button>`;
+    syncAmounts();
+    renderCart();
+  } catch(e) {
+    console.warn('Error al obtener cotización BNA:', e);
+    bnaRate = null;
+    if (el) el.innerHTML =
+      '<span class="bna-err">⚠️ No se pudo obtener la cotización BNA</span>' +
+      '&nbsp;<button class="bna-refresh-btn" onclick="fetchBnaRate()">↻ Reintentar</button>';
+  }
 }
 
 // ── PAY MIX: AGREGAR / QUITAR ENTRADAS ──
@@ -119,9 +143,9 @@ function renderPayMix() {
              <input class="pay-mix-inp" type="number" id="pm-pct-${m.id}" min="0" max="100" step="1"
                     value="${m.pct.toFixed(1)}" oninput="updatePayPct(${m.id},this.value)"/>
            </div>
-           <div class="pay-mix-inp-group"><label>USD</label>
-             <input class="pay-mix-inp wide" type="number" id="pm-amt-${m.id}" min="0" step="0.01"
-                    placeholder="—" oninput="updatePayAmt(${m.id},this.value)"/>
+           <div class="pay-mix-inp-group"><label>$ ARS</label>
+             <input class="pay-mix-inp ars" type="number" id="pm-amt-${m.id}" min="0" step="1"
+                    placeholder="${bnaRate ? '—' : 'sin cotiz.'}" oninput="updatePayAmt(${m.id},this.value)"/>
            </div>` +
           (hasDays
             ? `<div class="pay-mix-inp-group"><label>Días</label>
@@ -159,9 +183,9 @@ function updatePayPct(id, val) {
   if (!m) return;
   m.pct = Math.max(0, Math.min(100, parseFloat(val) || 0));
   const total = getCartTotal();
-  if (total > 0) {
+  if (total > 0 && bnaRate) {
     const el = document.getElementById('pm-amt-' + id);
-    if (el) el.value = (total * m.pct / 100).toFixed(2);
+    if (el) el.value = Math.round(total * m.pct / 100 * bnaRate);
   }
   updateAllocBar();
   renderCart();
@@ -169,11 +193,12 @@ function updatePayPct(id, val) {
 
 function updatePayAmt(id, val) {
   const total = getCartTotal();
-  if (total <= 0) return;
+  if (total <= 0 || !bnaRate) return;
   const m = payMix.find(x => x.id === id);
   if (!m) return;
-  const amt = Math.max(0, parseFloat(val) || 0);
-  m.pct = Math.min(100, amt / total * 100);
+  const arsAmt = Math.max(0, parseFloat(val) || 0);
+  const usdAmt = arsAmt / bnaRate;
+  m.pct = Math.min(100, usdAmt / total * 100);
   const el = document.getElementById('pm-pct-' + id);
   if (el) el.value = m.pct.toFixed(1);
   updateAllocBar();
@@ -233,7 +258,14 @@ function syncAmounts() {
   if (total <= 0) return;
   payMix.forEach(m => {
     const el = document.getElementById('pm-amt-' + m.id);
-    if (el) el.value = (total * m.pct / 100).toFixed(2);
+    if (!el) return;
+    if (bnaRate) {
+      el.value = Math.round(total * m.pct / 100 * bnaRate);
+      el.placeholder = '—';
+    } else {
+      el.value = '';
+      el.placeholder = 'sin cotiz.';
+    }
   });
 }
 
@@ -482,6 +514,19 @@ function renderCart() {
   document.getElementById('s-total-iva').textContent  = fmtUSD(totalConIva);
   document.getElementById('s-desc').textContent       = `−${fmtUSD(volDiscAmt)} (${volDiscPct.toFixed(2)}%)`;
   document.getElementById('s-final').textContent      = fmtUSD(finalTotalCorrected);
+
+  const arsRow = document.getElementById('s-ars-row');
+  if (arsRow) {
+    if (bnaRate && !isUsdMode) {
+      document.getElementById('s-ars-rate').textContent =
+        `(BNA $ ${bnaRate.toLocaleString('es-AR',{minimumFractionDigits:2})}/USD)`;
+      document.getElementById('s-ars-total').textContent =
+        `$ ${Math.round(finalTotalCorrected * bnaRate).toLocaleString('es-AR')}`;
+      arsRow.style.display = 'flex';
+    } else {
+      arsRow.style.display = 'none';
+    }
+  }
   document.getElementById('disc-bar').style.width     = (Math.max(0, Math.min(netDiscPct,10))/10*100)+'%';
   document.getElementById('disc-label').textContent   = netDiscPct > 0
     ? `Descuento neto: ${netDiscPct.toFixed(2)}%`
@@ -564,7 +609,9 @@ function enviarWA() {
   } else {
     payDetail = parts.map(p => {
       const daysTxt = p.pm.perDay > 0 ? ` · ${p.days} días` : '';
-      return `${p.pm.label} ${p.pct.toFixed(0)}%${daysTxt}`;
+      const usdAmt = totalConIva * p.pct / 100;
+      const arsTxt = bnaRate ? ` ($ ${Math.round(usdAmt * bnaRate).toLocaleString('es-AR')} ARS)` : '';
+      return `${p.pm.label} ${p.pct.toFixed(0)}%${daysTxt}${arsTxt}`;
     }).join(' + ');
   }
 
@@ -572,12 +619,18 @@ function enviarWA() {
     ? `• Deducción ponderada (${totalDeduction.toFixed(2)}%): +${fmtUSD(totalConIva*totalDeduction/100)}\n`
     : '';
   const usdLine = usdBonus ? `• Bonus pago USD (1.00%): −${fmtUSD(totalConIva*0.01)}\n` : '';
+  const bnaLine = bnaRate && !isUsdMode
+    ? `• Cotización BNA vendedor: $ ${bnaRate.toLocaleString('es-AR',{minimumFractionDigits:2})}/USD\n`
+    : '';
+  const arsTotalLine = bnaRate && !isUsdMode
+    ? `• *TOTAL EN PESOS (aprox.): $ ${Math.round(finalTotal * bnaRate).toLocaleString('es-AR')}*\n`
+    : '';
 
   const msg = `🛒 *NUEVO PEDIDO TEDLE*\n📅 ${fecha}\n\n` +
     `👤 *Datos del cliente:*\n• Nombre: ${nombre}\n${empresa?`• Empresa: ${empresa}\n`:''}${tel?`• Teléfono: ${tel}\n`:''}${dir?`• Entrega: ${dir}\n`:''}\n` +
     `💳 *Forma de pago:* ${payDetail}\n\n` +
     `📦 *Detalle del pedido:*\n${items}\n` +
-    `💰 *Resumen:*\n• Subtotal s/IVA: ${fmtUSD(subtotalNet)}\n• IVA: ${fmtUSD(totalIva)}\n• Total c/IVA: ${fmtUSD(totalConIva)}\n• Desc. por volumen (${volDiscPct.toFixed(2)}%): −${fmtUSD(volDiscAmt)}\n${dedLine}${usdLine}• *TOTAL A PAGAR: ${fmtUSD(finalTotal)}* _(desc. neto ${netDiscPct.toFixed(2)}%)_`;
+    `💰 *Resumen:*\n• Subtotal s/IVA: ${fmtUSD(subtotalNet)}\n• IVA: ${fmtUSD(totalIva)}\n• Total c/IVA: ${fmtUSD(totalConIva)}\n• Desc. por volumen (${volDiscPct.toFixed(2)}%): −${fmtUSD(volDiscAmt)}\n${dedLine}${usdLine}• *TOTAL A PAGAR: ${fmtUSD(finalTotal)}* _(desc. neto ${netDiscPct.toFixed(2)}%)_\n${bnaLine}${arsTotalLine}`;
 
   window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
 }
@@ -585,6 +638,8 @@ function enviarWA() {
 
 
 // ── INIT ──
+fetchBnaRate();
+
 fetch('productos.json')
   .then(r => {
     if (!r.ok) throw new Error('HTTP ' + r.status);
