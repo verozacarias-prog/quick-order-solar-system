@@ -169,6 +169,17 @@ table.cart-table th:nth-child(4),table.cart-table td:nth-child(4){width:26px}
 .pay-info-box.show{display:block}
 .sum-row.deduction{color:#92400e}
 .sum-row.usd-bonus{color:var(--teal)}
+.sum-row.ars-total{color:var(--s700);border-top:1px dashed var(--s200);margin-top:.3rem;padding-top:.4rem;font-size:.82rem}
+
+/* BNA RATE BAR */
+.bna-rate-bar{background:var(--b50);border:1px solid var(--b100);border-radius:8px;padding:.5rem .85rem;margin-bottom:.75rem;font-size:.76rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.bna-ok{color:var(--b800)}
+.bna-ok strong{font-family:'DM Mono',monospace}
+.bna-err{color:#92400e}
+.bna-loading{color:var(--s500)}
+.bna-refresh-btn{background:none;border:1.5px solid var(--b400);border-radius:5px;color:var(--b700);font-size:.75rem;padding:1px 7px;cursor:pointer;transition:all .15s;font-family:inherit}
+.bna-refresh-btn:hover{background:var(--b100)}
+.pay-mix-inp.ars{width:110px}
 
 /* SECTION HEADERS */
 .section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--s500);padding:.35rem .8rem;background:var(--s100);border-bottom:1px solid var(--s200)}
@@ -261,6 +272,11 @@ table.cart-table th:nth-child(4),table.cart-table td:nth-child(4){width:26px}
         <span style="font-size:.72rem;color:var(--s500);margin-left:auto">Afecta el descuento final</span>
       </div>
       <div class="card-body">
+        <!-- Cotización BNA -->
+        <div id="bna-rate-display" class="bna-rate-bar">
+          <span class="bna-loading">⏳ Obteniendo cotización BNA…</span>
+        </div>
+
         <!-- USD exclusivo -->
         <label class="pay-usd-opt" id="pay-usd-opt">
           <input type="checkbox" id="pay-usd-cb" onchange="toggleUsdMode(this.checked)"/>
@@ -273,7 +289,7 @@ table.cart-table th:nth-child(4),table.cart-table td:nth-child(4){width:26px}
 
         <!-- Métodos combinables -->
         <div id="pay-mix-section">
-          <div class="pay-mix-hint">Seleccioná uno o más métodos. Podés agregar varias instancias del mismo cheque. Los porcentajes deben sumar 100%.</div>
+          <div class="pay-mix-hint">Seleccioná uno o más métodos. Ingresá el monto <strong>en pesos argentinos (ARS)</strong> — se convierte a USD usando la cotización BNA vendedor. Los porcentajes deben sumar 100%.</div>
 
           <!-- Secciones por tipo generadas por renderPayMix() -->
           <div id="pay-mix-entries"></div>
@@ -312,6 +328,10 @@ table.cart-table th:nth-child(4),table.cart-table td:nth-child(4){width:26px}
             <div class="sum-row deduction" id="s-pay-row" style="display:none"><span id="s-pay-label">Deducción pago</span><span class="val" id="s-pay-val">—</span></div>
             <div class="sum-row usd-bonus" id="s-usd-row" style="display:none"><span>💵 Bonus pago en USD</span><span class="val" id="s-usd-val">—</span></div>
             <div class="sum-row total"><span>TOTAL A PAGAR</span><span class="val" id="s-final">—</span></div>
+            <div class="sum-row ars-total" id="s-ars-row" style="display:none">
+              <span>≈ En pesos <span id="s-ars-rate" style="font-size:.7rem;color:var(--s500)"></span></span>
+              <span class="val" id="s-ars-total">—</span>
+            </div>
           </div>
 
           <button class="btn btn-wa" id="btn-wa" onclick="enviarWA()" disabled>
