@@ -182,7 +182,7 @@ function updatePayPct(id, val) {
   const m = payMix.find(x => x.id === id);
   if (!m) return;
   m.pct = Math.max(0, Math.min(100, parseFloat(val) || 0));
-  const total = getCartTotal();
+  const total = getFinalTotal();
   if (total > 0 && bnaRate) {
     const el = document.getElementById('pm-amt-' + id);
     if (el) el.value = Math.round(total * m.pct / 100 * bnaRate);
@@ -192,7 +192,7 @@ function updatePayPct(id, val) {
 }
 
 function updatePayAmt(id, val) {
-  const total = getCartTotal();
+  const total = getFinalTotal();
   if (total <= 0 || !bnaRate) return;
   const m = payMix.find(x => x.id === id);
   if (!m) return;
@@ -232,6 +232,15 @@ function getCartTotal() {
   return sub + iva;
 }
 
+function getFinalTotal() {
+  const totalConIva = getCartTotal();
+  if (totalConIva <= 0) return 0;
+  const volDiscPct = getDiscount(totalConIva);
+  const { totalDeduction, usdBonus } = getPayInfo();
+  const netDiscPct = volDiscPct - totalDeduction + (usdBonus ? 1 : 0);
+  return totalConIva * (1 - netDiscPct / 100);
+}
+
 function updateAllocBar() {
   const total = payMix.reduce((s, m) => s + m.pct, 0);
   const pct = Math.min(total, 100);
@@ -254,7 +263,7 @@ function updateAllocBar() {
 }
 
 function syncAmounts() {
-  const total = getCartTotal();
+  const total = getFinalTotal();
   if (total <= 0) return;
   payMix.forEach(m => {
     const el = document.getElementById('pm-amt-' + m.id);
