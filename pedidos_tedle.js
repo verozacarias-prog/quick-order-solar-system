@@ -53,7 +53,7 @@ async function fetchBnaRate() {
     const d = await r.json();
     bnaRate = parseFloat(d.venta);
     if (el) el.innerHTML =
-      `<span class="bna-ok">💵 Dólar BNA vendedor: <strong>$ ${bnaRate.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span>` +
+      `<span class="bna-ok">💵 Dólar BNA vendedor: <strong>$ ${bnaRate.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span>` +
       `&nbsp;<button class="bna-refresh-btn" onclick="fetchBnaRate()" title="Actualizar cotización">↻</button>`;
     syncAmounts();
     renderCart();
@@ -144,7 +144,7 @@ function renderPayMix() {
                     value="${m.pct.toFixed(1)}" oninput="updatePayPct(${m.id},this.value)"/>
            </div>
            <div class="pay-mix-inp-group"><label>$ ARS</label>
-             <input class="pay-mix-inp ars" type="number" id="pm-amt-${m.id}" min="0" step="1"
+             <input class="pay-mix-inp ars" type="text" id="pm-amt-${m.id}" inputmode="decimal"
                     placeholder="${bnaRate ? '—' : 'sin cotiz.'}" oninput="updatePayAmt(${m.id},this.value)"/>
            </div>` +
           (hasDays
@@ -185,7 +185,7 @@ function updatePayPct(id, val) {
   const total = getFinalTotal();
   if (total > 0 && bnaRate) {
     const el = document.getElementById('pm-amt-' + id);
-    if (el) el.value = Math.round(total * m.pct / 100 * bnaRate);
+    if (el) el.value = fmtARS(total * m.pct / 100 * bnaRate);
   }
   updateAllocBar();
   renderCart();
@@ -196,7 +196,7 @@ function updatePayAmt(id, val) {
   if (total <= 0 || !bnaRate) return;
   const m = payMix.find(x => x.id === id);
   if (!m) return;
-  const arsAmt = Math.max(0, parseFloat(val) || 0);
+  const arsAmt = Math.max(0, parseFloat((val || '').replace(/\./g, '').replace(',', '.')) || 0);
   const usdAmt = arsAmt / bnaRate;
   m.pct = Math.min(100, usdAmt / total * 100);
   const el = document.getElementById('pm-pct-' + id);
@@ -262,14 +262,18 @@ function updateAllocBar() {
   }
 }
 
+function fmtARS(n) {
+  return n.toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
 function syncAmounts() {
   const total = getFinalTotal();
   if (total <= 0) return;
   payMix.forEach(m => {
     const el = document.getElementById('pm-amt-' + m.id);
-    if (!el) return;
+    if (!el || document.activeElement === el) return;
     if (bnaRate) {
-      el.value = Math.round(total * m.pct / 100 * bnaRate);
+      el.value = fmtARS(total * m.pct / 100 * bnaRate);
       el.placeholder = '—';
     } else {
       el.value = '';
